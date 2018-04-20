@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Collection of notifications",
+  "properties": {
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "tag.json"
+      }
+    },
+    "totalRecords": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "tags",
+    "totalRecords"
+  ]
+}
