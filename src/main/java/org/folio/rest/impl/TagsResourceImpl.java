@@ -23,7 +23,6 @@ import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
-import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.messages.MessageConsts;
@@ -36,30 +35,28 @@ import org.z3950.zing.cql.cql2pgjson.FieldException;
 import org.z3950.zing.cql.cql2pgjson.SchemaException;
 
 // TODO:
-// - Find and rename all mentions of notify (once all code is copied in)
-// - Enable CQL validation, latest RMB must support it
 
 
 
 public class TagsResourceImpl implements TagsResource {
   private final Logger logger = LoggerFactory.getLogger("mod-tags");
   private final Messages messages = Messages.getInstance();
-  private static final String NOTIFY_TABLE = "tags";
+  private static final String TAGS_TABLE = "tags";
   private static final String LOCATION_PREFIX = "/tags/";
   private static final String IDFIELDNAME = "_id";
-  private String notifySchema = null;
-  private static final String NOTIFY_SCHEMA_NAME = "apidocs/raml/tags.json";
+  private String tagSchema = null;
+  private static final String TAG_SCHEMA_NAME = "apidocs/raml/tag.json";
 
   private void initCQLValidation() {
     try {
-      notifySchema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(NOTIFY_SCHEMA_NAME), "UTF-8");
+      tagSchema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(TAG_SCHEMA_NAME), "UTF-8");
     } catch (Exception e) {
-      logger.error("unable to load schema - " + NOTIFY_SCHEMA_NAME + ", validation of query fields will not be active");
+      logger.error("unable to load schema - " + TAG_SCHEMA_NAME + ", validation of query fields will not be active",e);
     }
   }
 
   public TagsResourceImpl(Vertx vertx, String tenantId) {
-    if (notifySchema == null) { // Commented out, the validation fails a
+    if (tagSchema == null) { // Commented out, the validation fails a
       //initCQLValidation();   // prerfectly valid query=metaData.createdByUserId=e037b...
     }
     PostgresClient.getInstance(vertx, tenantId).setIdField(IDFIELDNAME);
@@ -68,10 +65,10 @@ public class TagsResourceImpl implements TagsResource {
   private CQLWrapper getCQL(String query, int limit, int offset)
     throws FieldException, IOException, SchemaException {
     CQL2PgJSON cql2pgJson;
-    if (notifySchema != null) {
-      cql2pgJson = new CQL2PgJSON(NOTIFY_TABLE + ".jsonb", notifySchema);
+    if (tagSchema != null) {
+      cql2pgJson = new CQL2PgJSON(TAGS_TABLE + ".jsonb", tagSchema);
     } else {
-      cql2pgJson = new CQL2PgJSON(NOTIFY_TABLE + ".jsonb");
+      cql2pgJson = new CQL2PgJSON(TAGS_TABLE + ".jsonb");
     }
     CQLWrapper wrap = new CQLWrapper(cql2pgJson, query);
     if (limit >= 0) {
@@ -104,7 +101,7 @@ public class TagsResourceImpl implements TagsResource {
       return;
     }
     PostgresClient.getInstance(vertxContext.owner(), tenantId)
-      .get(NOTIFY_TABLE, Tag.class, new String[]{"*"}, cql,
+      .get(TAGS_TABLE, Tag.class, new String[]{"*"}, cql,
         true /*get count too*/, false /* set id */,
         reply -> {
           if (reply.succeeded()) {
@@ -134,7 +131,7 @@ public class TagsResourceImpl implements TagsResource {
       String tenantId = TenantTool.calculateTenantId(
         okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
       String id = entity.getId();
-      PostgresClient.getInstance(context.owner(), tenantId).save(NOTIFY_TABLE,
+      PostgresClient.getInstance(context.owner(), tenantId).save(TAGS_TABLE,
         id, entity,
         reply -> {
           if (reply.succeeded()) {
@@ -168,19 +165,19 @@ public class TagsResourceImpl implements TagsResource {
       return;
     }
       PostgresClient.getInstance(context.owner(), tenantId)
-        .get(NOTIFY_TABLE, Tag.class, cql, true,
+        .get(TAGS_TABLE, Tag.class, cql, true,
           reply -> {
             if (reply.succeeded()) {
 
               @SuppressWarnings("unchecked")
-              List<Tag> notifylist
+              List<Tag> tagslist
                 = (List<Tag>) reply.result().getResults();
-              if (notifylist.isEmpty()) {
+              if (tagslist.isEmpty()) {
                 asyncResultHandler.handle(succeededFuture(GetTagsByIdResponse
                     .withPlainNotFound(id)));
               } else {
                 asyncResultHandler.handle(succeededFuture(GetTagsByIdResponse
-                  .withJsonOK(notifylist.get(0))));
+                  .withJsonOK(tagslist.get(0))));
               }
             } else {
               ValidationHelper.handleError(reply.cause(), asyncResultHandler);
@@ -198,7 +195,7 @@ public class TagsResourceImpl implements TagsResource {
     String tenantId = TenantTool.calculateTenantId(
       okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
       PostgresClient.getInstance(vertxContext.owner(), tenantId)
-        .delete(NOTIFY_TABLE, id,
+        .delete(TAGS_TABLE, id,
           reply -> {
             if (reply.succeeded()) {
               if (reply.result().getUpdated() == 1) {
@@ -236,7 +233,7 @@ public class TagsResourceImpl implements TagsResource {
       String tenantId = TenantTool.calculateTenantId(
         okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
       String userId = okapiHeaders.get(RestVerticle.OKAPI_USERID_HEADER);
-      PostgresClient.getInstance(vertxContext.owner(), tenantId).update(NOTIFY_TABLE, entity, id,
+      PostgresClient.getInstance(vertxContext.owner(), tenantId).update(TAGS_TABLE, entity, id,
         reply -> {
             if (reply.succeeded()) {
               if (reply.result().getUpdated() == 0) {
