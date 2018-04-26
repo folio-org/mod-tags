@@ -5,6 +5,7 @@ import io.vertx.core.Context;
 import static io.vertx.core.Future.succeededFuture;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import java.io.IOException;
@@ -18,11 +19,14 @@ import org.folio.rest.jaxrs.model.Errors;
 import org.folio.rest.jaxrs.model.Tag;
 import org.folio.rest.jaxrs.model.TagsCollection;
 import org.folio.rest.jaxrs.resource.TagsResource;
+import org.folio.rest.persist.Criteria.Criteria;
+import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLWrapper;
+import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
@@ -106,9 +110,9 @@ public class TagsResourceImpl implements TagsResource {
           if (reply.succeeded()) {
             TagsCollection notes = new TagsCollection();
             @SuppressWarnings("unchecked")
-            List<Tag> notifylist
+            List<Tag> taglist
               = (List<Tag>) reply.result().getResults();
-            notes.setTags(notifylist);
+            notes.setTags(taglist);
             Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
             notes.setTotalRecords(totalRecords);
             asyncResultHandler.handle(succeededFuture(
@@ -147,18 +151,106 @@ public class TagsResourceImpl implements TagsResource {
     }
 
   @Override
-  public void getTagsById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  public void getTagsById(String id, 
+    String lang, Map<String, String> okapiHeaders,
+    Handler<AsyncResult<Response>> asyncResultHandler,
+    Context context) throws Exception {
+
+    String tenantId = TenantTool.calculateTenantId(
+      okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+    Criterion cql;
+    try{
+      cql = new Criterion(
+        new Criteria().addField(IDFIELDNAME).setJSONB(false)
+        .setOperation("=").setValue("'" + id + "'"));
+    } catch (Exception e) {
+      ValidationHelper.handleError(e, asyncResultHandler);
+      return;
+    }
+      PostgresClient.getInstance(context.owner(), tenantId)
+        .get(NOTIFY_TABLE, Tag.class, cql, true,
+          reply -> {
+            if (reply.succeeded()) {
+
+              @SuppressWarnings("unchecked")
+              List<Tag> notifylist
+                = (List<Tag>) reply.result().getResults();
+              if (notifylist.isEmpty()) {
+                asyncResultHandler.handle(succeededFuture(GetTagsByIdResponse
+                    .withPlainNotFound(id)));
+              } else {
+                asyncResultHandler.handle(succeededFuture(GetTagsByIdResponse
+                  .withJsonOK(notifylist.get(0))));
+              }
+            } else {
+              ValidationHelper.handleError(reply.cause(), asyncResultHandler);
+            }
+          });
+
   }
 
   @Override
-  public void deleteTagsById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  public void deleteTagsById(String id, 
+    String lang, Map<String, String> okapiHeaders,
+    Handler<AsyncResult<Response>> asyncResultHandler,
+    Context vertxContext) throws Exception {
+
+    String tenantId = TenantTool.calculateTenantId(
+      okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+      PostgresClient.getInstance(vertxContext.owner(), tenantId)
+        .delete(NOTIFY_TABLE, id,
+          reply -> {
+            if (reply.succeeded()) {
+              if (reply.result().getUpdated() == 1) {
+                asyncResultHandler.handle(succeededFuture(
+                    DeleteTagsByIdResponse.withNoContent()));
+              } else { // TODO - Error helper?
+                logger.error(messages.getMessage(lang,
+                    MessageConsts.DeletedCountError, 1, reply.result().getUpdated()));
+                asyncResultHandler.handle(succeededFuture(DeleteTagsByIdResponse
+                    .withPlainNotFound(messages.getMessage(lang,
+                        MessageConsts.DeletedCountError, 1, reply.result().getUpdated()))));
+              }
+            } else {
+              ValidationHelper.handleError(reply.cause(), asyncResultHandler);
+            }
+          });
+
   }
 
   @Override
-  public void putTagsById(String id, String lang, Tag entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  public void putTagsById(String id,
+          String lang, Tag entity, Map<String, String> okapiHeaders,
+          Handler<AsyncResult<Response>> asyncResultHandler,
+          Context vertxContext) throws Exception {
+      logger.info("PUT tag " + id + " " + Json.encode(entity));
+      String noteId = entity.getId();
+      if (noteId != null && !noteId.equals(id)) {
+        logger.error("Trying to change tag Id from " + id + " to " + noteId);
+        Errors valErr = ValidationHelper.createValidationErrorMessage("id", noteId,
+          "Can not change the id");
+        asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+          .withJsonUnprocessableEntity(valErr)));
+        return;
+      }
+      String tenantId = TenantTool.calculateTenantId(
+        okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+      String userId = okapiHeaders.get(RestVerticle.OKAPI_USERID_HEADER);
+      PostgresClient.getInstance(vertxContext.owner(), tenantId).update(NOTIFY_TABLE, entity, id,
+        reply -> {
+            if (reply.succeeded()) {
+              if (reply.result().getUpdated() == 0) {
+                asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+                  .withPlainInternalServerError("internalErrorMsg(null, lang)")));
+              } else { // all ok
+                asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+                        .withNoContent() ));
+              }
+            } else {
+              ValidationHelper.handleError(reply.cause(), asyncResultHandler);
+            }
+        });
+
   }
 
 }

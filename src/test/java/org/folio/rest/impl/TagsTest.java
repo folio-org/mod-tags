@@ -86,7 +86,7 @@ public class TagsTest {
     async = context.async();
     PostgresClient.stopEmbeddedPostgres();
     vertx.close(res -> {   // This logs a stack trace, ignore it.
-      logger.info("tagsTest done");
+      logger.info("tagsTest cleanup done");
       async.complete();
     });
   }
@@ -146,6 +146,39 @@ public class TagsTest {
       .statusCode(200)
       .body(containsString("the first test"))
       .body(containsString("\"totalRecords\" : 1"));
+
+    logger.info("Get that one tag by id");
+    given()
+      .header(TEN)
+      .get("/tags/" + id1)
+      .then().log().ifValidationFails()
+      .statusCode(200)
+      .body(containsString("first test"));
+
+    logger.info("Update the tag");
+    String tag2 = "{\"id\" : \"" + id1 + "\", "
+            + "\"label\" : \"First tag\", "
+            + "\"description\" : \"This is the UPDATED test tag\" }";
+    given()
+      .header(TEN).header(JSON)
+      .body(tag1)
+      .put("/tags/" + id1)
+      .then().log().ifValidationFails()
+      .statusCode(204);
+
+    logger.info("Delete that one tag by id");
+    given()
+      .header(TEN)
+      .delete("/tags/" + id1)
+      .then().log().ifValidationFails()
+      .statusCode(204);
+
+    logger.info("See that it is gone");
+    given()
+      .header(TEN)
+      .get("/tags/" + id1)
+      .then().log().ifValidationFails()
+      .statusCode(404);
 
     // All done
     logger.info("tagsTest done ==== ");
