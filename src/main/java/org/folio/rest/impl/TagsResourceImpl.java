@@ -203,7 +203,7 @@ public class TagsResourceImpl implements TagsResource {
               if (reply.result().getUpdated() == 1) {
                 asyncResultHandler.handle(succeededFuture(
                     DeleteTagsByIdResponse.withNoContent()));
-              } else { // TODO - Error helper?
+              } else {
                 logger.error(messages.getMessage(lang,
                     MessageConsts.DeletedCountError, 1, reply.result().getUpdated()));
                 asyncResultHandler.handle(succeededFuture(DeleteTagsByIdResponse

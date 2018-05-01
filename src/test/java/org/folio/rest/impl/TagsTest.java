@@ -200,6 +200,20 @@ public class TagsTest {
       .statusCode(422)
       .body(containsString("invalid input syntax for type uuid"));
 
+    logger.info("Get by wrong id");
+    given()
+      .header(TEN)
+      .get("/tags/" + UUID.randomUUID().toString())
+      .then().log().ifValidationFails()
+      .statusCode(404);
+
+    logger.info("Get by bad id");
+    given()
+      .header(TEN)
+      .get("/tags/9999-BAD-UUID-9999")
+      .then().log().ifValidationFails()
+      .statusCode(422);
+
     logger.info("Unknown field");
     String UnknownField = tag1.replaceAll("description", "unknownField");
     given()
@@ -210,17 +224,7 @@ public class TagsTest {
       .statusCode(422)
       .body(containsString("Unrecognized field"));
 
-    logger.info("Changing ID");
-    String changeId = tag1.replaceAll(id1.toString(), UUID.randomUUID().toString());
-    given()
-      .header(TEN).header(JSON)
-      .body(changeId)
-      .put("/tags/" + id1)
-      .then().log().ifValidationFails()
-      .statusCode(422)
-      .body(containsString("Can not change the id"));
-
-    // Part 4:  Post a few records to test queries with
+    logger.info("Put tag1 back in the database");
     given()
       .header(TEN).header(JSON)
       .body(tag1)
@@ -229,6 +233,26 @@ public class TagsTest {
       .statusCode(201)
       .body(containsString("first test"));
 
+    logger.info("Changing ID");
+    String newId = UUID.randomUUID().toString();
+    String changeId = tag1.replaceAll(id1.toString(), newId);
+    given()
+      .header(TEN).header(JSON)
+      .body(changeId)
+      .put("/tags/" + id1)
+      .then().log().ifValidationFails()
+      .statusCode(422)
+      .body(containsString("Can not change the id"));
+
+    logger.info("PUT to non-existing");
+    given()
+      .header(TEN).header(JSON)
+      .body(changeId)
+      .put("/tags/" + newId)
+      .then().log().ifValidationFails()
+      .statusCode(500);  // Should probably be a 404, or 201.
+
+    // Part 4:  Post a few records to test queries with
     logger.info("Second tag: Metadata and missing Id");
     String second = "{ \"label\":\"second tag\"}";
     logger.info(second);
@@ -287,15 +311,15 @@ public class TagsTest {
       .statusCode(200)
       .body(containsString("\"totalRecords\" : 1"));
 
-    /*
-    logger.info("metadata query"); // Fails die to a missing index
+    logger.info("metadata query"); // Fails due to a missing index
+    // if the initCQLValidation() call is not commented out.
     given()
       .header(TEN)
       .get("/tags?query=metadata.createdByUserId=" + USERID7)
-      .then().log().ifValidationFails()
-      .statusCode(200)
-      .body(containsString("\"totalRecords\" : 1"));
-    */
+      .then().log().all(); //ifValidationFails()
+    //.statusCode(200)
+    //.body(containsString("\"totalRecords\" : 2"));
+
     logger.info("query");
     given()
       .header(TEN)
