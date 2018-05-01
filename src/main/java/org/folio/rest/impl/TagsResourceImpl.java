@@ -11,6 +11,7 @@ import io.vertx.core.logging.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
@@ -34,10 +35,6 @@ import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 import org.z3950.zing.cql.cql2pgjson.FieldException;
 import org.z3950.zing.cql.cql2pgjson.SchemaException;
 
-// TODO:
-
-
-
 public class TagsResourceImpl implements TagsResource {
   private final Logger logger = LoggerFactory.getLogger("mod-tags");
   private final Messages messages = Messages.getInstance();
@@ -49,15 +46,16 @@ public class TagsResourceImpl implements TagsResource {
 
   private void initCQLValidation() {
     try {
-      tagSchema = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(TAG_SCHEMA_NAME), "UTF-8");
+      tagSchema = IOUtils.toString(getClass().getClassLoader()
+        .getResourceAsStream(TAG_SCHEMA_NAME), "UTF-8");
     } catch (Exception e) {
       logger.error("unable to load schema - " + TAG_SCHEMA_NAME + ", validation of query fields will not be active",e);
     }
   }
 
   public TagsResourceImpl(Vertx vertx, String tenantId) {
-    if (tagSchema == null) { // Commented out, the validation fails a
-      //initCQLValidation();   // prerfectly valid query=metaData.createdByUserId=e037b...
+    if (tagSchema == null) {
+      initCQLValidation();
     }
     PostgresClient.getInstance(vertx, tenantId).setIdField(IDFIELDNAME);
   }
@@ -127,10 +125,14 @@ public class TagsResourceImpl implements TagsResource {
       Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler,
       Context context) throws Exception {
-    
+
       String tenantId = TenantTool.calculateTenantId(
         okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-      String id = entity.getId();
+    String id = entity.getId();
+    if (id == null) {
+      id = UUID.randomUUID().toString();
+      entity.setId(id);
+    }
       PostgresClient.getInstance(context.owner(), tenantId).save(TAGS_TABLE,
         id, entity,
         reply -> {
@@ -148,7 +150,7 @@ public class TagsResourceImpl implements TagsResource {
     }
 
   @Override
-  public void getTagsById(String id, 
+  public void getTagsById(String id,
     String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler,
     Context context) throws Exception {
@@ -187,7 +189,7 @@ public class TagsResourceImpl implements TagsResource {
   }
 
   @Override
-  public void deleteTagsById(String id, 
+  public void deleteTagsById(String id,
     String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler,
     Context vertxContext) throws Exception {
@@ -220,34 +222,32 @@ public class TagsResourceImpl implements TagsResource {
           String lang, Tag entity, Map<String, String> okapiHeaders,
           Handler<AsyncResult<Response>> asyncResultHandler,
           Context vertxContext) throws Exception {
-      logger.info("PUT tag " + id + " " + Json.encode(entity));
-      String noteId = entity.getId();
-      if (noteId != null && !noteId.equals(id)) {
-        logger.error("Trying to change tag Id from " + id + " to " + noteId);
-        Errors valErr = ValidationHelper.createValidationErrorMessage("id", noteId,
-          "Can not change the id");
-        asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
-          .withJsonUnprocessableEntity(valErr)));
-        return;
-      }
-      String tenantId = TenantTool.calculateTenantId(
-        okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-      String userId = okapiHeaders.get(RestVerticle.OKAPI_USERID_HEADER);
-      PostgresClient.getInstance(vertxContext.owner(), tenantId).update(TAGS_TABLE, entity, id,
-        reply -> {
-            if (reply.succeeded()) {
-              if (reply.result().getUpdated() == 0) {
-                asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
-                  .withPlainInternalServerError("internalErrorMsg(null, lang)")));
-              } else { // all ok
-                asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
-                        .withNoContent() ));
-              }
-            } else {
-              ValidationHelper.handleError(reply.cause(), asyncResultHandler);
-            }
-        });
-
+    logger.info("PUT tag " + id + " " + Json.encode(entity));
+    String noteId = entity.getId();
+    if (noteId != null && !noteId.equals(id)) {
+      logger.error("Trying to change tag Id from " + id + " to " + noteId);
+      Errors valErr = ValidationHelper.createValidationErrorMessage("id", noteId,
+        "Can not change the id");
+      asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+        .withJsonUnprocessableEntity(valErr)));
+      return;
+    }
+    String tenantId = TenantTool.calculateTenantId(
+      okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+    PostgresClient.getInstance(vertxContext.owner(), tenantId)
+      .update(TAGS_TABLE, entity, id, reply -> {
+        if (reply.succeeded()) {
+          if (reply.result().getUpdated() == 0) {
+            asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+              .withPlainInternalServerError("internalErrorMsg(null, lang)")));
+          } else { // all ok
+            asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+              .withNoContent()));
+          }
+        } else {
+          ValidationHelper.handleError(reply.cause(), asyncResultHandler);
+        }
+      });
   }
 
 }

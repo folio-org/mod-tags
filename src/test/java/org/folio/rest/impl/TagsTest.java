@@ -38,7 +38,8 @@ public class TagsTest {
   private final int pgPort = Integer.parseInt(System.getProperty("pgPort","9248"));
   private static final String LS = System.lineSeparator();
   private final Header TEN = new Header("X-Okapi-Tenant", "testlib");
-
+  private final String USERID7 = "77777777-7777-7777-7777-777777777777";
+  private final Header USER7 = new Header("X-Okapi-User-Id", USERID7);
   private final Header JSON = new Header("Content-Type", "application/json");
   private String moduleName; // "mod-tags";
   private String moduleVersion; // "0.2.0-SNAPSHOT";
@@ -98,8 +99,9 @@ public class TagsTest {
     async = context.async();
     logger.info("tagsTest starting ==== ");  // search for ==== in mvn output
 
+    // Part 1: Preliminaries
     UUID id1 = UUID.randomUUID();
-    
+
     // Simple GET request to see the module is running and we can talk to it.
     given()
       .get("/admin/health")
@@ -125,11 +127,11 @@ public class TagsTest {
       .statusCode(200)
       .body(containsString("\"tags\" : [ ]"));
 
+    // Part 2: Simple CRUD operations
     logger.info("Post a tag");
     String tag1 = "{\"id\" : \"" + id1 + "\", "
             + "\"label\" : \"First tag\", "
             + "\"description\" : \"This is the first test tag\" }";
-    logger.info("Post a tag");
     given()
       .header(TEN).header(JSON)
       .body(tag1)
@@ -179,6 +181,128 @@ public class TagsTest {
       .get("/tags/" + id1)
       .then().log().ifValidationFails()
       .statusCode(404);
+
+    logger.info("Try to delete it again");
+    given()
+      .header(TEN)
+      .delete("/tags/" + id1)
+      .then().log().ifValidationFails()
+      .statusCode(404);
+
+    // Part 3: Validation
+    logger.info("Bad UUID");
+    String badUuid = tag1.replaceAll("-", "XXX");
+    given()
+      .header(TEN).header(JSON)
+      .body(badUuid)
+      .post("/tags")
+      .then().log().ifValidationFails()
+      .statusCode(422)
+      .body(containsString("invalid input syntax for type uuid"));
+
+    logger.info("Unknown field");
+    String UnknownField = tag1.replaceAll("description", "unknownField");
+    given()
+      .header(TEN).header(JSON)
+      .body(UnknownField)
+      .post("/tags")
+      .then().log().ifValidationFails()
+      .statusCode(422)
+      .body(containsString("Unrecognized field"));
+
+    logger.info("Changing ID");
+    String changeId = tag1.replaceAll(id1.toString(), UUID.randomUUID().toString());
+    given()
+      .header(TEN).header(JSON)
+      .body(changeId)
+      .put("/tags/" + id1)
+      .then().log().ifValidationFails()
+      .statusCode(422)
+      .body(containsString("Can not change the id"));
+
+    // Part 4:  Post a few records to test queries with
+    given()
+      .header(TEN).header(JSON)
+      .body(tag1)
+      .post("/tags")
+      .then().log().ifValidationFails()
+      .statusCode(201)
+      .body(containsString("first test"));
+
+    logger.info("Second tag: Metadata and missing Id");
+    String second = "{ \"label\":\"second tag\"}";
+    logger.info(second);
+    given()
+      .header(TEN).header(JSON).header(USER7)
+      .body(second)
+      .post("/tags")
+      .then().log().ifValidationFails()
+      .statusCode(201)
+      .body(containsString(USERID7))
+      .body(containsString("createdByUserId"));
+    logger.info("Second tag: Metadata and missing Id");
+
+    String third = "{ \"label\":\"third tag\","
+      + "\"description\" : \"Tag number three\"}";
+    logger.info(third);
+    given()
+      .header(TEN).header(JSON)
+      .body(third)
+      .post("/tags")
+      .then().log().ifValidationFails()
+      .statusCode(201);
+
+    String fourth = "{ \"label\":\"fourth tag\","
+      + "\"description\" : \"Tag number FOUR\"}";
+    logger.info(fourth);
+    given()
+      .header(TEN).header(JSON).header(USER7)
+      .body(fourth)
+      .post("/tags")
+      .then().log().ifValidationFails()
+      .statusCode(201);
+
+    // Part 5: Test queries and limits
+    logger.info("List test tags");
+    given()
+      .header(TEN)
+      .get("/tags")
+      .then().log().all() //.ifValidationFails()
+      .statusCode(200)
+      .body(containsString("\"totalRecords\" : 4"));
+
+    logger.info("query");
+    given()
+      .header(TEN)
+      .get("/tags?query=label=tag")
+      .then().log().ifValidationFails()
+      .statusCode(200)
+      .body(containsString("\"totalRecords\" : 4"));
+
+    logger.info("second query");
+    given()
+      .header(TEN)
+      .get("/tags?query=label=second")
+      .then().log().ifValidationFails()
+      .statusCode(200)
+      .body(containsString("\"totalRecords\" : 1"));
+
+    /*
+    logger.info("metadata query"); // Fails die to a missing index
+    given()
+      .header(TEN)
+      .get("/tags?query=metadata.createdByUserId=" + USERID7)
+      .then().log().ifValidationFails()
+      .statusCode(200)
+      .body(containsString("\"totalRecords\" : 1"));
+    */
+    logger.info("query");
+    given()
+      .header(TEN)
+      .get("/tags?query=label=tag&offset=2&limit=1")
+      .then().log().ifValidationFails()
+      .statusCode(200)
+      .body(containsString("\"totalRecords\" : 4"));
 
     // All done
     logger.info("tagsTest done ==== ");
