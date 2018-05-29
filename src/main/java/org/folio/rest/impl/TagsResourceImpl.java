@@ -150,6 +150,7 @@ public class TagsResourceImpl implements TagsResource {
     }
 
   @Override
+  @Validate
   public void getTagsById(String id,
     String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler,
@@ -218,6 +219,7 @@ public class TagsResourceImpl implements TagsResource {
   }
 
   @Override
+  @Validate
   public void putTagsById(String id,
           String lang, Tag entity, Map<String, String> okapiHeaders,
           Handler<AsyncResult<Response>> asyncResultHandler,
