@@ -320,9 +320,9 @@ public class TagsTest {
     given()
       .header(TEN)
       .get("/tags?query=metadata.createdByUserId=" + USERID7)
-      .then().log().all(); //ifValidationFails()
-    //.statusCode(200)
-    //.body(containsString("\"totalRecords\" : 2"));
+      .then().log().all() //ifValidationFails()
+      .statusCode(200)
+      .body(containsString("\"totalRecords\" : 2"));
 
     logger.info("query");
     given()
