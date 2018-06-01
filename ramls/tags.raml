@@ -38,9 +38,7 @@ resourceTypes:
       exampleItem: !include examples/tag.sample
 
   post:
-    is: [
-      validate
-    ]
+    is: [validate]
   get:
     is: [
       searchable: {description: "with valid searchable fields: for example label=foo", example: "label=foo"},

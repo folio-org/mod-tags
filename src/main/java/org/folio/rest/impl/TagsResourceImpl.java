@@ -42,7 +42,7 @@ public class TagsResourceImpl implements TagsResource {
   private static final String LOCATION_PREFIX = "/tags/";
   private static final String IDFIELDNAME = "_id";
   private String tagSchema = null;
-  private static final String TAG_SCHEMA_NAME = "apidocs/raml/tag.json";
+  private static final String TAG_SCHEMA_NAME = "raml/tag.json";
 
   private void initCQLValidation() {
     try {
@@ -190,6 +190,7 @@ public class TagsResourceImpl implements TagsResource {
   }
 
   @Override
+  @Validate
   public void deleteTagsById(String id,
     String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler,
