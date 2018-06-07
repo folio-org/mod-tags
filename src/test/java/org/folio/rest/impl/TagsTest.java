@@ -26,8 +26,8 @@ import org.junit.runner.RunWith;
 /**
  * Unit tests for mod-tags.
  * Tags is a simple module, so the test are pretty simple too. We run against
- * the embedded postgres (oby default on port 9248, unlikely to collide with
- * a real postgress, or anything else), so we always start from a clean slate,
+ * the embedded postgres (by default on port 9248,
+ * unlikely to collide with * a real postgress, or anything else), so we always start from a clean slate,
  * and there is no need to clean up afterwards.
  */
 @RunWith(VertxUnitRunner.class)
@@ -295,7 +295,7 @@ public class TagsTest {
     given()
       .header(TEN)
       .get("/tags")
-      .then().log().all() //.ifValidationFails()
+      .then().log().ifValidationFails()
       .statusCode(200)
       .body(containsString("\"totalRecords\" : 4"));
 
@@ -315,12 +315,11 @@ public class TagsTest {
       .statusCode(200)
       .body(containsString("\"totalRecords\" : 1"));
 
-    logger.info("metadata query"); // Fails due to a missing index
-    // if the initCQLValidation() call is not commented out.
+    logger.info("metadata query");
     given()
       .header(TEN)
       .get("/tags?query=metadata.createdByUserId=" + USERID7)
-      .then().log().all() //ifValidationFails()
+      .then().log().ifValidationFails()
       .statusCode(200)
       .body(containsString("\"totalRecords\" : 2"));
 
