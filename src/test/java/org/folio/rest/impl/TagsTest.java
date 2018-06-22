@@ -331,6 +331,16 @@ public class TagsTest {
       .statusCode(200)
       .body(containsString("\"totalRecords\" : 4"));
 
+    logger.info("Substring search, empty string, ==");
+    // Matches all that have a description not defined
+    given()
+      .header(TEN)
+      .get("/tags?query=cql.allRecords=1 NOT description=\"\"")
+      .then().log().ifValidationFails()
+      .statusCode(200)
+      .body(containsString("\"totalRecords\" : 1"))
+      .body(containsString("second tag"));
+
     // All done
     logger.info("tagsTest done ==== ");
     async.complete();
