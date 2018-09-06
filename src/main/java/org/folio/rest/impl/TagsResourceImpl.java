@@ -28,7 +28,6 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
-import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
@@ -105,8 +104,7 @@ public class TagsResourceImpl implements Tags {
           if (reply.succeeded()) {
             TagsCollection notes = new TagsCollection();
             @SuppressWarnings("unchecked")
-            List<Tag> taglist
-              = (List<Tag>) reply.result().getResults();
+            List<Tag> taglist = reply.result().getResults();
             notes.setTags(taglist);
             Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
             notes.setTotalRecords(totalRecords);
