@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 
 title: Notes API
 baseUri: https://github.com/folio-org/mod-tags
@@ -8,24 +8,20 @@ documentation:
   - title: mod-tags API
     content: This documents the API calls that can be made to post tags that can be attached to various objects
 
-schemas:
-  - tag.json: !include tag.json
-  - tagsCollection: !include tagsCollection.json
-  - errors: !include raml-util/schemas/errors.schema
-  - error.schema: !include raml-util/schemas/error.schema
-  - parameters.schema: !include raml-util/schemas/parameters.schema
-  - raml-util/schemas/metadata.schema: !include raml-util/schemas/metadata.schema
+types:
+  tag: !include tag.json
+  tagsCollection: !include tagsCollection.json
+  errors: !include raml-util/schemas/errors.schema
 
 traits:
-  - validate: !include raml-util/traits/validation.raml
-  - secured: !include raml-util/traits/auth.raml
-  - language: !include raml-util/traits/language.raml
-  - pageable:  !include raml-util/traits/pageable.raml
-  - searchable: !include raml-util/traits/searchable.raml
+  validate: !include raml-util/traits/validation.raml
+  language: !include raml-util/traits/language.raml
+  pageable:  !include raml-util/traits/pageable.raml
+  searchable: !include raml-util/traits/searchable.raml
 
 resourceTypes:
-  - collection: !include raml-util/rtypes/collection.raml
-  - collection-item: !include raml-util/rtypes/item-collection.raml
+  collection: !include raml-util/rtypes/collection.raml
+  collection-item: !include raml-util/rtypes/item-collection.raml
 
 /tags:
   displayName: Tags
@@ -33,7 +29,7 @@ resourceTypes:
   type:
     collection:
       schemaCollection: tagsCollection
-      schemaItem: tag.json
+      schemaItem: tag
       exampleCollection: !include examples/tagsCollection.sample
       exampleItem: !include examples/tag.sample
 
@@ -50,7 +46,7 @@ resourceTypes:
     description: Get, Delete or Update a specific tag
     type:
       collection-item:
-        schema: tag.json
+        schema: tag
         exampleItem: !include examples/tag.sample
     put:
       is: [validate]
