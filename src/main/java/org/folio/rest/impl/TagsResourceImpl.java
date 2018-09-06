@@ -19,7 +19,7 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Errors;
 import org.folio.rest.jaxrs.model.Tag;
 import org.folio.rest.jaxrs.model.TagsCollection;
-import org.folio.rest.jaxrs.resource.TagsResource;
+import org.folio.rest.jaxrs.resource.Tags;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
@@ -28,14 +28,13 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
-import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 import org.z3950.zing.cql.cql2pgjson.FieldException;
 import org.z3950.zing.cql.cql2pgjson.SchemaException;
 
-public class TagsResourceImpl implements TagsResource {
+public class TagsResourceImpl implements Tags {
   private final Logger logger = LoggerFactory.getLogger("mod-tags");
   private final Messages messages = Messages.getInstance();
   private static final String TAGS_TABLE = "tags";
@@ -85,7 +84,7 @@ public class TagsResourceImpl implements TagsResource {
     int offset, int limit, String lang,
     Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler,
-    Context vertxContext) throws Exception {
+    Context vertxContext) {
 
     CQLWrapper cql;
     String tenantId = TenantTool.calculateTenantId(
@@ -105,13 +104,12 @@ public class TagsResourceImpl implements TagsResource {
           if (reply.succeeded()) {
             TagsCollection notes = new TagsCollection();
             @SuppressWarnings("unchecked")
-            List<Tag> taglist
-              = (List<Tag>) reply.result().getResults();
+            List<Tag> taglist = reply.result().getResults();
             notes.setTags(taglist);
             Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
             notes.setTotalRecords(totalRecords);
             asyncResultHandler.handle(succeededFuture(
-              GetTagsResponse.withJsonOK(notes)));
+              GetTagsResponse.respond200WithApplicationJson(notes)));
           } else {
             ValidationHelper.handleError(reply.cause(), asyncResultHandler);
           }
@@ -124,7 +122,7 @@ public class TagsResourceImpl implements TagsResource {
       Tag entity,
       Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler,
-      Context context) throws Exception {
+      Context context) {
 
       String tenantId = TenantTool.calculateTenantId(
         okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -137,12 +135,11 @@ public class TagsResourceImpl implements TagsResource {
         id, entity,
         reply -> {
           if (reply.succeeded()) {
-            Object ret = reply.result();
-            entity.setId((String) ret);
-            OutStream stream = new OutStream();
-            stream.setData(entity);
-            asyncResultHandler.handle(succeededFuture(PostTagsResponse
-                .withJsonCreated(LOCATION_PREFIX + ret, stream)));
+            String ret = reply.result();
+            entity.setId(ret);
+            asyncResultHandler.handle(succeededFuture(PostTagsResponse.
+              respond201WithApplicationJson(entity, PostTagsResponse.headersFor201()
+                .withLocation(LOCATION_PREFIX + ret))));
           } else {
             ValidationHelper.handleError(reply.cause(), asyncResultHandler);
           }
@@ -154,7 +151,7 @@ public class TagsResourceImpl implements TagsResource {
   public void getTagsById(String id,
     String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler,
-    Context context) throws Exception {
+    Context context) {
 
     String tenantId = TenantTool.calculateTenantId(
       okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -177,10 +174,10 @@ public class TagsResourceImpl implements TagsResource {
                 = (List<Tag>) reply.result().getResults();
               if (tagslist.isEmpty()) {
                 asyncResultHandler.handle(succeededFuture(GetTagsByIdResponse
-                    .withPlainNotFound(id)));
+                  .respond404WithTextPlain(id)));
               } else {
                 asyncResultHandler.handle(succeededFuture(GetTagsByIdResponse
-                  .withJsonOK(tagslist.get(0))));
+                  .respond200WithApplicationJson(tagslist.get(0))));
               }
             } else {
               ValidationHelper.handleError(reply.cause(), asyncResultHandler);
@@ -194,7 +191,7 @@ public class TagsResourceImpl implements TagsResource {
   public void deleteTagsById(String id,
     String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler,
-    Context vertxContext) throws Exception {
+    Context vertxContext) {
 
     String tenantId = TenantTool.calculateTenantId(
       okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -204,12 +201,12 @@ public class TagsResourceImpl implements TagsResource {
             if (reply.succeeded()) {
               if (reply.result().getUpdated() == 1) {
                 asyncResultHandler.handle(succeededFuture(
-                    DeleteTagsByIdResponse.withNoContent()));
+                    DeleteTagsByIdResponse.respond204()));
               } else {
                 logger.error(messages.getMessage(lang,
                     MessageConsts.DeletedCountError, 1, reply.result().getUpdated()));
                 asyncResultHandler.handle(succeededFuture(DeleteTagsByIdResponse
-                    .withPlainNotFound(messages.getMessage(lang,
+                  .respond404WithTextPlain(messages.getMessage(lang,
                         MessageConsts.DeletedCountError, 1, reply.result().getUpdated()))));
               }
             } else {
@@ -224,7 +221,7 @@ public class TagsResourceImpl implements TagsResource {
   public void putTagsById(String id,
           String lang, Tag entity, Map<String, String> okapiHeaders,
           Handler<AsyncResult<Response>> asyncResultHandler,
-          Context vertxContext) throws Exception {
+          Context vertxContext) {
     logger.info("PUT tag " + id + " " + Json.encode(entity));
     String noteId = entity.getId();
     if (noteId != null && !noteId.equals(id)) {
@@ -232,7 +229,7 @@ public class TagsResourceImpl implements TagsResource {
       Errors valErr = ValidationHelper.createValidationErrorMessage("id", noteId,
         "Can not change the id");
       asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
-        .withJsonUnprocessableEntity(valErr)));
+        .respond422WithApplicationJson(valErr)));
       return;
     }
     String tenantId = TenantTool.calculateTenantId(
@@ -242,10 +239,10 @@ public class TagsResourceImpl implements TagsResource {
         if (reply.succeeded()) {
           if (reply.result().getUpdated() == 0) {
             asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
-              .withPlainInternalServerError("internalErrorMsg(null, lang)")));
+              .respond500WithTextPlain("internalErrorMsg(null, lang)")));
           } else { // all ok
             asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
-              .withNoContent()));
+              .respond204()));
           }
         } else {
           ValidationHelper.handleError(reply.cause(), asyncResultHandler);

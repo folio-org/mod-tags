@@ -47,10 +47,6 @@ public class TagsTest {
   Vertx vertx;
   Async async;
 
-  static {
-    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4jLogDelegateFactory");
-  }
-
   @Before
   public void setUp(TestContext context) {
     vertx = Vertx.vertx();
