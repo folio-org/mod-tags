@@ -1,3 +1,6 @@
+## 0.1.3 2018-09-20
+ * MODTAG_10 Fix bad pageable
+
 ## 0.1.2 2018-09-07
  * MODTAG-9 Update to RAML 1.0
 
