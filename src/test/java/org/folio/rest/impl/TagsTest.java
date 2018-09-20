@@ -327,6 +327,19 @@ public class TagsTest {
       .statusCode(200)
       .body(containsString("\"totalRecords\" : 4"));
 
+    given()
+      .header(TEN)
+      .get("/tags?query=label=tag&offset=2&limit=101")
+      .then().log().ifValidationFails()
+      .statusCode(200)
+      .body(containsString("\"totalRecords\" : 4"));
+
+    given()
+      .header(TEN)
+      .get("/tags?query=label=tag&offset=2&limit=-1")
+      .then().log().ifValidationFails()
+      .statusCode(400);
+
     logger.info("Substring search, empty string, ==");
     // Matches all that have a description not defined
     given()
