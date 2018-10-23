@@ -4,6 +4,7 @@
   "description": "Collection of tags",
   "properties": {
     "tags": {
+      "description": "List of tags",
       "type": "array",
       "items": {
         "type": "object",
