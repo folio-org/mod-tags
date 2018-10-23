@@ -1,9 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "description": "Collection of notifications",
+  "description": "Collection of tags",
   "properties": {
     "tags": {
+      "description": "List of tags",
       "type": "array",
       "items": {
         "type": "object",

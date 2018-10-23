@@ -5,12 +5,15 @@
   "additionalProperties": false,
   "properties": {
     "id": {
+      "description": "The UUID of this tag",
       "type": "string"
     },
     "label": {
+      "description": "The short label of this tag",
       "type": "string"
     },
     "description": {
+      "description": "The description of this tag",
       "type": "string"
     },
     "metadata": {
