@@ -1,3 +1,9 @@
+## 0.2.0 2018-11-30
+ * Update to Vert.x 3.5.4
+ * Update to RMB 23.2.1
+ * MODTAG.11 Use description fields in RAML JSON schemas
+ * MODTAG-10 Bad pageable
+
 ## 0.1.2 2018-09-07
  * MODTAG-9 Update to RAML 1.0
 
