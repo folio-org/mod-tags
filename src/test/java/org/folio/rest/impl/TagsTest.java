@@ -36,6 +36,7 @@ import org.junit.runner.RunWith;
  * and there is no need to clean up afterwards.
  */
 @RunWith(VertxUnitRunner.class)
+@SuppressWarnings("squid:S2699")
 public class TagsTest {
 
   private final Logger logger = LoggerFactory.getLogger("TagsTest");

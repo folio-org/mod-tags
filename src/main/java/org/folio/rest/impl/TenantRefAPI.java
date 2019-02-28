@@ -32,7 +32,6 @@ public class TenantRefAPI extends TenantAPI {
       tl.addJsonIdContent(SAMPLE_KEY, SAMPLE_LEAD, "", "tags");
       tl.perform(ta, headers, vertx, res1 -> {
         if (res1.failed()) {
-          res1.cause().printStackTrace();
           hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
             .respond500WithTextPlain(res1.cause().getLocalizedMessage())));
           return;
