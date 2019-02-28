@@ -9,6 +9,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -46,7 +47,7 @@ public class TagsResourceImpl implements Tags {
   private void initCQLValidation() {
     try {
       tagSchema = IOUtils.toString(getClass().getClassLoader()
-        .getResourceAsStream(TAG_SCHEMA_NAME), "UTF-8");
+        .getResourceAsStream(TAG_SCHEMA_NAME), StandardCharsets.UTF_8);
     } catch (Exception e) {
       logger.error("unable to load schema - " + TAG_SCHEMA_NAME + ", validation of query fields will not be active",e);
     }
@@ -234,20 +235,38 @@ public class TagsResourceImpl implements Tags {
     }
     String tenantId = TenantTool.calculateTenantId(
       okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-    PostgresClient.getInstance(vertxContext.owner(), tenantId)
-      .update(TAGS_TABLE, entity, id, reply -> {
-        if (reply.succeeded()) {
-          if (reply.result().getUpdated() == 0) {
-            asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
-              .respond500WithTextPlain("internalErrorMsg(null, lang)")));
-          } else { // all ok
-            asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
-              .respond204()));
-          }
+    
+    // check id exists
+    getTagsById(id, lang, okapiHeaders, ar -> {
+      if (ar.succeeded()) {
+        int status = ar.result().getStatus();
+        if (404 == status) {
+          asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+            .respond404WithTextPlain(id)));
+        } else if (200 == status) {
+          PostgresClient.getInstance(vertxContext.owner(), tenantId)
+          .update(TAGS_TABLE, entity, id, reply -> {
+            if (reply.succeeded()) {
+              if (reply.result().getUpdated() == 0) {
+                asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+                  .respond500WithTextPlain("internalErrorMsg(null, lang)")));
+              } else { // all ok
+                asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+                  .respond204()));
+              }
+            } else {
+              ValidationHelper.handleError(reply.cause(), asyncResultHandler);
+            }
+          });
         } else {
-          ValidationHelper.handleError(reply.cause(), asyncResultHandler);
+          asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+            .respond500WithTextPlain("Unexpected query by id response code: " + status)));
         }
-      });
+      } else {
+        ValidationHelper.handleError(ar.cause(), asyncResultHandler);
+      }
+    }, vertxContext);
+    
   }
 
 }
