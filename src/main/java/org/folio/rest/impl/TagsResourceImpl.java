@@ -234,20 +234,41 @@ public class TagsResourceImpl implements Tags {
     }
     String tenantId = TenantTool.calculateTenantId(
       okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-    PostgresClient.getInstance(vertxContext.owner(), tenantId)
-      .update(TAGS_TABLE, entity, id, reply -> {
-        if (reply.succeeded()) {
-          if (reply.result().getUpdated() == 0) {
+    
+    // check id exists
+    getTagsById(id, lang, okapiHeaders, new Handler<AsyncResult<Response>>() {
+      @Override
+      public void handle(AsyncResult<Response> ar) {
+        if (ar.succeeded()) {
+          int status = ar.result().getStatus();
+          if (404 == status) {
             asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
-              .respond500WithTextPlain("internalErrorMsg(null, lang)")));
-          } else { // all ok
+              .respond404WithTextPlain(id)));
+          } else if (200 == status) {
+            PostgresClient.getInstance(vertxContext.owner(), tenantId)
+            .update(TAGS_TABLE, entity, id, reply -> {
+              if (reply.succeeded()) {
+                if (reply.result().getUpdated() == 0) {
+                  asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+                    .respond500WithTextPlain("internalErrorMsg(null, lang)")));
+                } else { // all ok
+                  asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
+                    .respond204()));
+                }
+              } else {
+                ValidationHelper.handleError(reply.cause(), asyncResultHandler);
+              }
+            });
+          } else {
             asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
-              .respond204()));
+              .respond500WithTextPlain("Unexpected query by id response code: " + status)));
           }
         } else {
-          ValidationHelper.handleError(reply.cause(), asyncResultHandler);
+          ValidationHelper.handleError(ar.cause(), asyncResultHandler);
         }
-      });
+      }
+    }, vertxContext);
+    
   }
 
 }

@@ -6,13 +6,18 @@ import com.jayway.restassured.response.Header;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+
+import java.util.Map;
 import java.util.UUID;
+
+import org.apache.commons.collections15.map.HashedMap;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;
@@ -41,11 +46,19 @@ public class TagsTest {
   private final String USERID7 = "77777777-7777-7777-7777-777777777777";
   private final Header USER7 = new Header("X-Okapi-User-Id", USERID7);
   private final Header JSON = new Header("Content-Type", "application/json");
+  private final Header X_OKAPI_URL_TO = new Header("X-Okapi-Url-to", "http://localhost:" + port);
   private String moduleName; // "mod-tags";
   private String moduleVersion; // "0.2.0-SNAPSHOT";
   private String moduleId; // "mod-tags-0.2.0-SNAPSHOT"
   Vertx vertx;
   Async async;
+  
+  // sample tags from sample-data directory
+  private static final Map<String, String> TAGS = new HashedMap<>();
+  static {
+    TAGS.put("c3799dc5-500b-44dd-8e17-2f2354cc43e3", "urgent");
+    TAGS.put("d3c8b511-41e7-422e-a483-18778d0596e5", "important");
+  }
 
   @Before
   public void setUp(TestContext context) {
@@ -92,8 +105,6 @@ public class TagsTest {
     });
   }
 
-
-
   @Test
   public void tests(TestContext context) throws  Exception {
     async = context.async();
@@ -108,17 +119,46 @@ public class TagsTest {
       .then().log().ifValidationFails()
       .statusCode(200);
 
-    // Call the tenant interface to initialize the database
-    String tenants = "{\"module_to\":\"" + moduleId + "\"}";
-    logger.info("About to call the tenant interface " + tenants);
+    // Call the tenant interface to initialize the database and load sample data
+    JsonArray ar = new JsonArray();
+    ar.add(new JsonObject().put("key", "loadReference").put("value", "true"));
+    ar.add(new JsonObject().put("key", "loadSample").put("value", "true"));
+    JsonObject jo = new JsonObject();
+    jo.put("parameters", ar);
+    jo.put("module_to", moduleId);
+    logger.info("About to call the tenant interface " + jo.encodePrettily());
     given()
-      .header(TEN).header(JSON)
-      .body(tenants)
+      .header(TEN).header(USER7).header(X_OKAPI_URL_TO).header(JSON)
+      .body(jo.encode())
       .post("/_/tenant")
       .then().log().ifValidationFails()
       .statusCode(201);
     logger.info("Tenant interface ok ====");
 
+    // Check sample data size
+    logger.info("List of sample tags");
+    given()
+      .header(TEN)
+      .get("/tags")
+      .then().log().ifValidationFails()
+      .statusCode(200)
+      .body(containsString("\"totalRecords\" : " + TAGS.size()));
+
+    // Check sample data
+    TAGS.forEach((key, value) -> {
+      given().header(TEN).get("/tags/" + key)
+        .then().log().ifValidationFails()
+        .statusCode(200)
+        .body(containsString(value));
+    });
+
+    // Remove sample data
+    TAGS.keySet().forEach(key -> {
+      given().header(TEN).delete("/tags/" + key)
+        .then().log().ifValidationFails()
+        .statusCode(204);
+    });
+    
     logger.info("Empty list of tags");
     given()
       .header(TEN)
@@ -250,7 +290,7 @@ public class TagsTest {
       .body(changeId)
       .put("/tags/" + newId)
       .then().log().ifValidationFails()
-      .statusCode(500);  // Should probably be a 404, or 201.
+      .statusCode(404);  // Should probably be a 404, or 201.
 
     // Part 4:  Post a few records to test queries with
     logger.info("Second tag: Metadata and missing Id");
