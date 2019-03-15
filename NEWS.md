@@ -1,3 +1,7 @@
+## 0.3.0 2019-03-15
+ * MODTAG-15 Use loadSample to load sample data
+ * MODTAG-16 Update RMB dependency to v23.11.0
+
 ## 0.2.0 2018-11-30
  * Update to Vert.x 3.5.4
  * Update to RMB 23.2.1
