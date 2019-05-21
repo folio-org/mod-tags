@@ -22,6 +22,11 @@ this module when the user uses a new one.
 See project [MODTAG](https://issues.folio.org/browse/MODTAG)
 at the [FOLIO issue tracker](https://dev.folio.org/guidelines/issue-tracker).
 
+### ModuleDescriptor
+
+See the built `target/ModuleDescriptor.json` for the interfaces that this module
+requires and provides, the permissions, and the additional module metadata.
+
 ### Other documentation
 
 Other [modules](https://dev.folio.org/source-code/#server-side) are described,
