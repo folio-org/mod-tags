@@ -53,7 +53,7 @@ public class TagsTest {
   private String moduleId; // "mod-tags-0.2.0-SNAPSHOT"
   Vertx vertx;
   Async async;
-  
+
   // sample tags from sample-data directory
   private static final Map<String, String> TAGS = new HashedMap<>();
   static {
@@ -159,7 +159,7 @@ public class TagsTest {
         .then().log().ifValidationFails()
         .statusCode(204);
     });
-    
+
     logger.info("Empty list of tags");
     given()
       .header(TEN)
@@ -180,6 +180,17 @@ public class TagsTest {
       .then().log().ifValidationFails()
       .statusCode(201)
       .body(containsString("first test"));
+
+    String duplicateTag = "{\"label\" : \"First tag\", " +
+      "\"description\" : \"This is the first test tag\" }";
+    logger.info("Post tag with duplicated label");
+    given()
+      .header(TEN).header(JSON)
+      .body(duplicateTag)
+      .post("/tags")
+      .then().log().ifValidationFails()
+      .statusCode(422)
+      .body(containsString("label"));
 
     logger.info("List of that one tag");
     given()

@@ -3,6 +3,8 @@ package org.folio.rest.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import static io.vertx.core.Future.succeededFuture;
+
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
@@ -27,6 +29,7 @@ import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLWrapper;
+import org.folio.rest.persist.interfaces.Results;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.TenantTool;
@@ -39,6 +42,7 @@ public class TagsResourceImpl implements Tags {
   private final Logger logger = LoggerFactory.getLogger("mod-tags");
   private final Messages messages = Messages.getInstance();
   private static final String TAGS_TABLE = "tags";
+  private static final String LABEL_COLUMN = "label";
   private static final String LOCATION_PREFIX = "/tags/";
   private static final String IDFIELDNAME = "_id";
   private String tagSchema = null;
@@ -124,28 +128,43 @@ public class TagsResourceImpl implements Tags {
       Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler,
       Context context) {
+    String tenantId = TenantTool.calculateTenantId(
+      okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+    PostgresClient postgresClient = PostgresClient.getInstance(context.owner(), tenantId);
 
-      String tenantId = TenantTool.calculateTenantId(
-        okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+    tagWithLabelExists(entity.getLabel(), postgresClient)
+      .map(tagExists -> {
+        if (tagExists) {
+          asyncResultHandler.handle(succeededFuture(PostTagsResponse.respond422WithApplicationJson(
+            ValidationHelper.createValidationErrorMessage(LABEL_COLUMN, entity.getLabel(),
+              "Tag with label \"" + entity.getLabel() + "\" already exists"))));
+        } else {
+          addTag(entity, postgresClient, asyncResultHandler);
+        }
+        return null;
+      });
+    }
+
+  private void addTag(Tag entity, PostgresClient postgresClient, Handler<AsyncResult<Response>> asyncResultHandler) {
     String id = entity.getId();
     if (id == null) {
       id = UUID.randomUUID().toString();
       entity.setId(id);
     }
-      PostgresClient.getInstance(context.owner(), tenantId).save(TAGS_TABLE,
-        id, entity,
-        reply -> {
-          if (reply.succeeded()) {
-            String ret = reply.result();
-            entity.setId(ret);
-            asyncResultHandler.handle(succeededFuture(PostTagsResponse.
-              respond201WithApplicationJson(entity, PostTagsResponse.headersFor201()
-                .withLocation(LOCATION_PREFIX + ret))));
-          } else {
-            ValidationHelper.handleError(reply.cause(), asyncResultHandler);
-          }
-        });
-    }
+    postgresClient.save(TAGS_TABLE,
+      id, entity,
+      reply -> {
+        if (reply.succeeded()) {
+          String ret = reply.result();
+          entity.setId(ret);
+          asyncResultHandler.handle(succeededFuture(PostTagsResponse.
+            respond201WithApplicationJson(entity, PostTagsResponse.headersFor201()
+              .withLocation(LOCATION_PREFIX + ret))));
+        } else {
+          ValidationHelper.handleError(reply.cause(), asyncResultHandler);
+        }
+      });
+  }
 
   @Override
   @Validate
@@ -235,7 +254,7 @@ public class TagsResourceImpl implements Tags {
     }
     String tenantId = TenantTool.calculateTenantId(
       okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-    
+
     // check id exists
     getTagsById(id, lang, okapiHeaders, ar -> {
       if (ar.succeeded()) {
@@ -266,7 +285,21 @@ public class TagsResourceImpl implements Tags {
         ValidationHelper.handleError(ar.cause(), asyncResultHandler);
       }
     }, vertxContext);
-    
+
   }
 
+  private Future<Boolean> tagWithLabelExists(String label, PostgresClient postgresClient) {
+    Future<Results<Tag>> future = Future.future();
+    postgresClient
+      .get(TAGS_TABLE, Tag.class, getCriterionByFieldNameAndValue("label", label), false, future);
+    return future.map(tags -> !tags.getResults().isEmpty());
+  }
+
+  private Criterion getCriterionByFieldNameAndValue(String field, String value) {
+    Criteria a = new Criteria();
+    a.addField("'" + field + "'");
+    a.setOperation("=");
+    a.setValue(value);
+    return new Criterion(a);
+  }
 }
