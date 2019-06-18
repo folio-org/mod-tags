@@ -3,8 +3,6 @@
     {
       "tableName": "tags",
       "withMetadata": true,
-      "pkColumnName": "_id",
-      "generateId": false,
       "withAuditing": false,
       "uniqueIndex": [
         {

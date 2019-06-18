@@ -1,5 +1,8 @@
 package org.folio.rest.impl;
 
+import static org.hamcrest.core.AnyOf.anyOf;
+import static org.hamcrest.Matchers.is;
+
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.given;
 import com.jayway.restassured.response.Header;
@@ -14,6 +17,7 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -53,7 +57,7 @@ public class TagsTest {
   private String moduleId; // "mod-tags-0.2.0-SNAPSHOT"
   Vertx vertx;
   Async async;
-  
+
   // sample tags from sample-data directory
   private static final Map<String, String> TAGS = new HashedMap<>();
   static {
@@ -61,8 +65,19 @@ public class TagsTest {
     TAGS.put("d3c8b511-41e7-422e-a483-18778d0596e5", "important");
   }
 
+  private void initPostgres() throws IOException {
+    if (System.getenv("DB_PORT") != null) {
+      // Use running PostgreSQL with the connection parameters passed in as DB_* environment variables
+      return;
+    }
+
+    PostgresClient.setIsEmbedded(true);
+    PostgresClient.setEmbeddedPort(pgPort);
+    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
+  }
+
   @Before
-  public void setUp(TestContext context) {
+  public void setUp(TestContext context) throws IOException {
     vertx = Vertx.vertx();
     moduleName = PomReader.INSTANCE.getModuleName()
       .replaceAll("_", "-");  // Rmb returns a 'normalized' name, with underscores
@@ -71,14 +86,7 @@ public class TagsTest {
 
     logger.info("Test setup starting for " + moduleId);
 
-    try {
-      PostgresClient.setIsEmbedded(true);
-      PostgresClient.setEmbeddedPort(pgPort);
-      PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-    } catch (Exception e) {
-      context.fail(e);
-      return;
-    }
+    initPostgres();
 
     JsonObject conf = new JsonObject()
       .put(HttpClientMock2.MOCK_MODE, "true")
@@ -120,6 +128,13 @@ public class TagsTest {
       .then().log().ifValidationFails()
       .statusCode(200);
 
+    // Delete the tenant schema from any previous test run
+    given()
+    .header(TEN).header(USER7).header(X_OKAPI_URL_TO)
+    .delete("/_/tenant")
+    .then().log().ifValidationFails()
+    .statusCode(anyOf(is(204), is(400)));  // deleted, or doen't exist
+
     // Call the tenant interface to initialize the database and load sample data
     JsonArray ar = new JsonArray();
     ar.add(new JsonObject().put("key", "loadReference").put("value", "true"));
@@ -159,7 +174,7 @@ public class TagsTest {
         .then().log().ifValidationFails()
         .statusCode(204);
     });
-    
+
     logger.info("Empty list of tags");
     given()
       .header(TEN)
