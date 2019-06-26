@@ -315,7 +315,7 @@ public class TagsTest {
       .post("/tags")
       .then().log().ifValidationFails()
       .statusCode(422)
-      .body(containsString("duplicate 'label' value violates unique constraint: first tag"));
+      .body(containsString("Tag with label 'first tag' already exists"));
 
     // Part 4:  Post a few records to test queries with
     logger.info("Second tag: Metadata and missing Id");

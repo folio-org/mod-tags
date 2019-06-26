@@ -90,7 +90,7 @@ public class TagsResourceImpl implements Tags {
               respond201WithApplicationJson(entity, PostTagsResponse.headersFor201()
                 .withLocation(LOCATION_PREFIX + ret))));
           } else {
-            handleError(reply.cause(), asyncResultHandler);
+            handleTagError(reply.cause(), asyncResultHandler);
           }
         });
     }
@@ -159,7 +159,7 @@ public class TagsResourceImpl implements Tags {
 
     PgUtil.postgresClient(vertxContext, okapiHeaders).update(TAGS_TABLE, entity, id, reply -> {
       if (reply.failed()) {
-        handleError(reply.cause(), asyncResultHandler);
+        handleTagError(reply.cause(), asyncResultHandler);
         return;
       }
       if (reply.result().getUpdated() == 0) {
@@ -176,10 +176,10 @@ public class TagsResourceImpl implements Tags {
     if (start >= end) {
       return s;
     }
-    return s.substring(start, end + 1);
+    return s.substring(start + 1, end);
   }
 
-  private void handleError(Throwable throwable, Handler<AsyncResult<Response>> asyncResultHandler) {
+  private void handleTagError(Throwable throwable, Handler<AsyncResult<Response>> asyncResultHandler) {
     try {
       ValidationHelper.handleError(throwable, reply -> {
         Response response = reply.result();
@@ -190,7 +190,7 @@ public class TagsResourceImpl implements Tags {
             String fieldname = error.getParameters().get(0).getKey();
             fieldname = extractFromSingleQuotes(fieldname);
             String value = error.getParameters().get(0).getValue();
-            error.setMessage("duplicate " + fieldname + " value violates unique constraint: " + value);
+            error.setMessage("Tag with " + fieldname + " '" + value + "' already exists");
           }
         }
         asyncResultHandler.handle(reply);
