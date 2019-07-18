@@ -170,7 +170,7 @@ public class TagsResourceImpl implements Tags {
     });
   }
 
-  private static String extractFromSingleQuotes(String s) {
+  static String extractFromSingleQuotes(String s) {
     int start = s.indexOf('\'');
     int end = s.lastIndexOf('\'');
     if (start >= end) {
@@ -179,7 +179,7 @@ public class TagsResourceImpl implements Tags {
     return s.substring(start + 1, end);
   }
 
-  private void handleTagError(Throwable throwable, Handler<AsyncResult<Response>> asyncResultHandler) {
+  void handleTagError(Throwable throwable, Handler<AsyncResult<Response>> asyncResultHandler) {
     try {
       ValidationHelper.handleError(throwable, reply -> {
         Response response = reply.result();
