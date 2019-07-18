@@ -1,5 +1,8 @@
 package org.folio.rest.impl;
 
+import static org.hamcrest.core.AnyOf.anyOf;
+import static org.hamcrest.Matchers.is;
+
 import com.jayway.restassured.RestAssured;
 import static com.jayway.restassured.RestAssured.given;
 import com.jayway.restassured.response.Header;
@@ -14,6 +17,7 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,13 +40,10 @@ import org.junit.runner.RunWith;
  * and there is no need to clean up afterwards.
  */
 @RunWith(VertxUnitRunner.class)
-@SuppressWarnings("squid:S2699")
 public class TagsTest {
 
   private final Logger logger = LoggerFactory.getLogger("TagsTest");
   private final int port = Integer.parseInt(System.getProperty("port", "8081"));
-  private final int pgPort = Integer.parseInt(System.getProperty("pgPort","9248"));
-  private static final String LS = System.lineSeparator();
   private final Header TEN = new Header("X-Okapi-Tenant", "testlib");
   private final String USERID7 = "77777777-7777-7777-7777-777777777777";
   private final Header USER7 = new Header("X-Okapi-User-Id", USERID7);
@@ -53,7 +54,7 @@ public class TagsTest {
   private String moduleId; // "mod-tags-0.2.0-SNAPSHOT"
   Vertx vertx;
   Async async;
-  
+
   // sample tags from sample-data directory
   private static final Map<String, String> TAGS = new HashedMap<>();
   static {
@@ -62,7 +63,7 @@ public class TagsTest {
   }
 
   @Before
-  public void setUp(TestContext context) {
+  public void setUp(TestContext context) throws IOException {
     vertx = Vertx.vertx();
     moduleName = PomReader.INSTANCE.getModuleName()
       .replaceAll("_", "-");  // Rmb returns a 'normalized' name, with underscores
@@ -70,15 +71,6 @@ public class TagsTest {
     moduleId = moduleName + "-" + moduleVersion;
 
     logger.info("Test setup starting for " + moduleId);
-
-    try {
-      PostgresClient.setIsEmbedded(true);
-      PostgresClient.setEmbeddedPort(pgPort);
-      PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-    } catch (Exception e) {
-      context.fail(e);
-      return;
-    }
 
     JsonObject conf = new JsonObject()
       .put(HttpClientMock2.MOCK_MODE, "true")
@@ -120,6 +112,13 @@ public class TagsTest {
       .then().log().ifValidationFails()
       .statusCode(200);
 
+    // Delete the tenant schema from any previous test run
+    given()
+    .header(TEN).header(USER7).header(X_OKAPI_URL_TO)
+    .delete("/_/tenant")
+    .then().log().ifValidationFails()
+    .statusCode(anyOf(is(204), is(400)));  // deleted, or doen't exist
+
     // Call the tenant interface to initialize the database and load sample data
     JsonArray ar = new JsonArray();
     ar.add(new JsonObject().put("key", "loadReference").put("value", "true"));
@@ -159,7 +158,7 @@ public class TagsTest {
         .then().log().ifValidationFails()
         .statusCode(204);
     });
-    
+
     logger.info("Empty list of tags");
     given()
       .header(TEN)
@@ -199,9 +198,6 @@ public class TagsTest {
       .body(containsString("first test"));
 
     logger.info("Update the tag");
-    String tag2 = "{\"id\" : \"" + id1 + "\", "
-            + "\"label\" : \"First tag\", "
-            + "\"description\" : \"This is the UPDATED test tag\" }";
     given()
       .header(TEN).header(JSON)
       .body(tag1)
