@@ -198,9 +198,12 @@ public class TagsTest {
       .body(containsString("first test"));
 
     logger.info("Update the tag");
+    String tag2 = "{\"id\" : \"" + id1 + "\", "
+            + "\"label\" : \"First tag\", "
+            + "\"description\" : \"This is the UPDATED test tag\" }";
     given()
       .header(TEN).header(JSON)
-      .body(tag1)
+      .body(tag2)
       .put("/tags/" + id1)
       .then().log().ifValidationFails()
       .statusCode(204);
@@ -288,6 +291,15 @@ public class TagsTest {
       .put("/tags/" + newId)
       .then().log().ifValidationFails()
       .statusCode(404);  // Should probably be a 404, or 201.
+
+    logger.info("Post tag with duplicated label");
+    given()
+      .header(TEN).header(JSON)
+      .body("{\"label\" : \"first tag\", \"description\" : \"I'm the duplicate!\" }")
+      .post("/tags")
+      .then().log().ifValidationFails()
+      .statusCode(422)
+      .body(containsString("Tag with label 'first tag' already exists"));
 
     // Part 4:  Post a few records to test queries with
     logger.info("Second tag: Metadata and missing Id");

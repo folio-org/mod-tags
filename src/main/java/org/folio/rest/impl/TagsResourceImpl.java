@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import org.folio.cql2pgjson.CQL2PgJSON;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.jaxrs.model.Error;
 import org.folio.rest.jaxrs.model.Errors;
 import org.folio.rest.jaxrs.model.Tag;
 import org.folio.rest.jaxrs.model.TagsCollection;
@@ -89,7 +90,7 @@ public class TagsResourceImpl implements Tags {
               respond201WithApplicationJson(entity, PostTagsResponse.headersFor201()
                 .withLocation(LOCATION_PREFIX + ret))));
           } else {
-            ValidationHelper.handleError(reply.cause(), asyncResultHandler);
+            handleTagError(reply.cause(), asyncResultHandler);
           }
         });
     }
@@ -158,7 +159,7 @@ public class TagsResourceImpl implements Tags {
 
     PgUtil.postgresClient(vertxContext, okapiHeaders).update(TAGS_TABLE, entity, id, reply -> {
       if (reply.failed()) {
-        ValidationHelper.handleError(reply.cause(), asyncResultHandler);
+        handleTagError(reply.cause(), asyncResultHandler);
         return;
       }
       if (reply.result().getUpdated() == 0) {
@@ -169,4 +170,35 @@ public class TagsResourceImpl implements Tags {
     });
   }
 
+  static String extractFromSingleQuotes(String s) {
+    int start = s.indexOf('\'');
+    int end = s.lastIndexOf('\'');
+    if (start >= end) {
+      return s;
+    }
+    return s.substring(start + 1, end);
+  }
+
+  void handleTagError(Throwable throwable, Handler<AsyncResult<Response>> asyncResultHandler) {
+    try {
+      ValidationHelper.handleError(throwable, reply -> {
+        Response response = reply.result();
+        if (response != null && response.getEntity() instanceof Errors) {
+          Errors errors = (Errors) response.getEntity();
+          Error error = errors.getErrors().get(0);
+          if (error.getMessage().contains("duplicate key value violates unique constraint")) {
+            String fieldname = error.getParameters().get(0).getKey();
+            fieldname = extractFromSingleQuotes(fieldname);
+            String value = error.getParameters().get(0).getValue();
+            error.setMessage("Tag with " + fieldname + " '" + value + "' already exists");
+          }
+        }
+        asyncResultHandler.handle(reply);
+      });
+    } catch (Exception e) {
+      logger.error(throwable.getMessage(), throwable);
+      logger.error(e.getMessage(), e);
+      ValidationHelper.handleError(e, asyncResultHandler);
+    }
+  }
 }
