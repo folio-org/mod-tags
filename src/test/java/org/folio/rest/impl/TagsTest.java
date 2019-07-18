@@ -40,13 +40,10 @@ import org.junit.runner.RunWith;
  * and there is no need to clean up afterwards.
  */
 @RunWith(VertxUnitRunner.class)
-@SuppressWarnings("squid:S2699")
 public class TagsTest {
 
   private final Logger logger = LoggerFactory.getLogger("TagsTest");
   private final int port = Integer.parseInt(System.getProperty("port", "8081"));
-  private final int pgPort = Integer.parseInt(System.getProperty("pgPort","9248"));
-  private static final String LS = System.lineSeparator();
   private final Header TEN = new Header("X-Okapi-Tenant", "testlib");
   private final String USERID7 = "77777777-7777-7777-7777-777777777777";
   private final Header USER7 = new Header("X-Okapi-User-Id", USERID7);
@@ -65,17 +62,6 @@ public class TagsTest {
     TAGS.put("d3c8b511-41e7-422e-a483-18778d0596e5", "important");
   }
 
-  private void initPostgres() throws IOException {
-    if (System.getenv("DB_PORT") != null) {
-      // Use running PostgreSQL with the connection parameters passed in as DB_* environment variables
-      return;
-    }
-
-    PostgresClient.setIsEmbedded(true);
-    PostgresClient.setEmbeddedPort(pgPort);
-    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-  }
-
   @Before
   public void setUp(TestContext context) throws IOException {
     vertx = Vertx.vertx();
@@ -85,8 +71,6 @@ public class TagsTest {
     moduleId = moduleName + "-" + moduleVersion;
 
     logger.info("Test setup starting for " + moduleId);
-
-    initPostgres();
 
     JsonObject conf = new JsonObject()
       .put(HttpClientMock2.MOCK_MODE, "true")
@@ -214,9 +198,6 @@ public class TagsTest {
       .body(containsString("first test"));
 
     logger.info("Update the tag");
-    String tag2 = "{\"id\" : \"" + id1 + "\", "
-            + "\"label\" : \"First tag\", "
-            + "\"description\" : \"This is the UPDATED test tag\" }";
     given()
       .header(TEN).header(JSON)
       .body(tag2)
