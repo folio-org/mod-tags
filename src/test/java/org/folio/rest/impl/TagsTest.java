@@ -198,6 +198,9 @@ public class TagsTest {
       .body(containsString("first test"));
 
     logger.info("Update the tag");
+    String tag2 = "{\"id\" : \"" + id1 + "\", "
+            + "\"label\" : \"First tag\", "
+            + "\"description\" : \"This is the UPDATED test tag\" }";
     given()
       .header(TEN).header(JSON)
       .body(tag2)
