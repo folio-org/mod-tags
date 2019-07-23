@@ -1,3 +1,8 @@
+## 0.4.0 2019-07-23
+
+ * MODTAG-17 Upgrade to RMB 26
+ * MODTAG-18 Better error messaging to UI
+
 ## 0.3.0 2019-03-15
  * MODTAG-15 Use loadSample to load sample data
  * MODTAG-16 Update RMB dependency to v23.11.0
