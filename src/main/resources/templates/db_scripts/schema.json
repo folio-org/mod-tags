@@ -4,6 +4,7 @@
       "tableName": "tags",
       "withMetadata": true,
       "withAuditing": false,
+      "fromModuleVersion": "mod-tags-0.4.0",
       "uniqueIndex": [
         {
           "fieldName": "label",
