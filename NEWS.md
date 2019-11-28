@@ -1,3 +1,9 @@
+## 0.5.0 2019-11-28
+ * MODTAG-34 Upgrade to RMB v29.0.1
+ * FOLIO-2358 Use new base docker image and new JAVA_OPTIONS MaxRAMPercentage
+ * FOLIO-2321 Remove old MD metadata
+ * FOLIO-2234 Add LaunchDescriptor settings
+
 ## 0.4.0 2019-07-23
 
  * MODTAG-17 Upgrade to RMB 26
