@@ -238,7 +238,7 @@ public class TagsTest {
       .post("/tags")
       .then().log().ifValidationFails()
       .statusCode(422)
-      .body(containsString("invalid input syntax for type uuid"));
+      .body(containsString("must match"));
 
     logger.info("Get by wrong id");
     given()
@@ -252,7 +252,7 @@ public class TagsTest {
       .header(TEN)
       .get("/tags/9999-BAD-UUID-9999")
       .then().log().ifValidationFails()
-      .statusCode(422);
+      .statusCode(400);
 
     logger.info("Unknown field");
     String UnknownField = tag1.replaceAll("description", "unknownField");

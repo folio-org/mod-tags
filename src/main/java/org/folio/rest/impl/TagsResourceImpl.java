@@ -1,16 +1,20 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.Future.succeededFuture;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.ws.rs.core.Response;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
-import static io.vertx.core.Future.succeededFuture;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import javax.ws.rs.core.Response;
+
 import org.folio.cql2pgjson.CQL2PgJSON;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
@@ -36,17 +40,17 @@ public class TagsResourceImpl implements Tags {
   @Override
   @Validate
   public void getTags(String query,
-    int offset, int limit, String lang,
-    Map<String, String> okapiHeaders,
-    Handler<AsyncResult<Response>> asyncResultHandler,
-    Context vertxContext) {
+                      int offset, int limit, String lang,
+                      Map<String, String> okapiHeaders,
+                      Handler<AsyncResult<Response>> asyncResultHandler,
+                      Context vertxContext) {
 
     try {
       logger.debug("Getting tags. "
         + offset + "+" + limit + " q=" + query);
       CQLWrapper cql = new CQLWrapper(new CQL2PgJSON(TAGS_TABLE + ".jsonb"), query, limit, offset);
       PgUtil.postgresClient(vertxContext, okapiHeaders)
-      .get(TAGS_TABLE, Tag.class, new String[]{"*"}, cql,
+        .get(TAGS_TABLE, Tag.class, new String[] {"*"}, cql,
           true /*get count too*/, false /* set id */,
           reply -> {
             if (reply.failed()) {
@@ -68,39 +72,38 @@ public class TagsResourceImpl implements Tags {
   @Override
   @Validate
   public void postTags(String lang,
-      Tag entity,
-      Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler,
-      Context context) {
+                       Tag entity,
+                       Map<String, String> okapiHeaders,
+                       Handler<AsyncResult<Response>> asyncResultHandler,
+                       Context context) {
 
-      String tenantId = TenantTool.calculateTenantId(
-        okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+    String tenantId = TenantTool.calculateTenantId(
+      okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
     String id = entity.getId();
     if (id == null) {
       id = UUID.randomUUID().toString();
       entity.setId(id);
     }
-      PostgresClient.getInstance(context.owner(), tenantId).save(TAGS_TABLE,
-        id, entity,
-        reply -> {
-          if (reply.succeeded()) {
-            String ret = reply.result();
-            entity.setId(ret);
-            asyncResultHandler.handle(succeededFuture(PostTagsResponse.
-              respond201WithApplicationJson(entity, PostTagsResponse.headersFor201()
-                .withLocation(LOCATION_PREFIX + ret))));
-          } else {
-            handleTagError(reply.cause(), asyncResultHandler);
-          }
-        });
-    }
+    PostgresClient.getInstance(context.owner(), tenantId).save(TAGS_TABLE, id, entity,
+      reply -> {
+        if (reply.succeeded()) {
+          String ret = reply.result();
+          entity.setId(ret);
+          asyncResultHandler.handle(succeededFuture(PostTagsResponse.
+            respond201WithApplicationJson(entity, PostTagsResponse.headersFor201()
+              .withLocation(LOCATION_PREFIX + ret))));
+        } else {
+          handleTagError(reply.cause(), asyncResultHandler);
+        }
+      });
+  }
 
   @Override
   @Validate
   public void getTagsById(String id,
-    String lang, Map<String, String> okapiHeaders,
-    Handler<AsyncResult<Response>> asyncResultHandler,
-    Context vertxContext) {
+                          String lang, Map<String, String> okapiHeaders,
+                          Handler<AsyncResult<Response>> asyncResultHandler,
+                          Context vertxContext) {
 
     PgUtil.postgresClient(vertxContext, okapiHeaders).getById(TAGS_TABLE, id, Tag.class, reply -> {
       if (reply.failed()) {
@@ -118,20 +121,20 @@ public class TagsResourceImpl implements Tags {
   @Override
   @Validate
   public void deleteTagsById(String id,
-    String lang, Map<String, String> okapiHeaders,
-    Handler<AsyncResult<Response>> asyncResultHandler,
-    Context vertxContext) {
+                             String lang, Map<String, String> okapiHeaders,
+                             Handler<AsyncResult<Response>> asyncResultHandler,
+                             Context vertxContext) {
 
     PgUtil.postgresClient(vertxContext, okapiHeaders).delete(TAGS_TABLE, id, reply -> {
       if (reply.failed()) {
         ValidationHelper.handleError(reply.cause(), asyncResultHandler);
         return;
       }
-      if (reply.result().getUpdated() != 1) {
-        String message = messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().getUpdated());
+      if (reply.result().rowCount() != 1) {
+        String message = messages.getMessage(lang, MessageConsts.DeletedCountError, 1, reply.result().rowCount());
         logger.error(message);
         asyncResultHandler.handle(succeededFuture(DeleteTagsByIdResponse
-            .respond404WithTextPlain(message)));
+          .respond404WithTextPlain(message)));
         return;
       }
       asyncResultHandler.handle(succeededFuture(DeleteTagsByIdResponse.respond204()));
@@ -141,14 +144,12 @@ public class TagsResourceImpl implements Tags {
   @Override
   @Validate
   public void putTagsById(String id,
-          String lang, Tag entity, Map<String, String> okapiHeaders,
-          Handler<AsyncResult<Response>> asyncResultHandler,
-          Context vertxContext) {
+                          String lang, Tag entity, Map<String, String> okapiHeaders,
+                          Handler<AsyncResult<Response>> asyncResultHandler,
+                          Context vertxContext) {
     logger.info("PUT tag " + id + " " + Json.encode(entity));
     String noteId = entity.getId();
     if (noteId != null && !noteId.equals(id)) {
-      // TODO: consider removing this check and instead use id to always overwrite jsonb->>'id', see
-      // PgUtil.put for an example.
       logger.error("Trying to change tag Id from " + id + " to " + noteId);
       Errors valErr = ValidationHelper.createValidationErrorMessage("id", noteId,
         "Can not change the id");
@@ -162,7 +163,7 @@ public class TagsResourceImpl implements Tags {
         handleTagError(reply.cause(), asyncResultHandler);
         return;
       }
-      if (reply.result().getUpdated() == 0) {
+      if (reply.result().rowCount() == 0) {
         asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse.respond404WithTextPlain(id)));
         return;
       }

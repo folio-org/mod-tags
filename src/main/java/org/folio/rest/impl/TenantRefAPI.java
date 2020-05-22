@@ -28,8 +28,11 @@ public class TenantRefAPI extends TenantAPI {
         hndlr.handle(res);
         return;
       }
-      TenantLoading tl = new TenantLoading();
-      tl.addJsonIdContent(SAMPLE_KEY, SAMPLE_LEAD, "", "tags");
+      TenantLoading tl = new TenantLoading()
+        .withKey(SAMPLE_KEY)
+        .withLead(SAMPLE_LEAD)
+        .withIdContent()
+        .add("", "tags");
       tl.perform(ta, headers, vertx, res1 -> {
         if (res1.failed()) {
           hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
