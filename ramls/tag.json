@@ -6,7 +6,8 @@
   "properties": {
     "id": {
       "description": "The UUID of this tag",
-      "type": "string"
+      "type": "string",
+      "$ref": "raml-util/schemas/uuid.schema"
     },
     "label": {
       "description": "The short label of this tag",
