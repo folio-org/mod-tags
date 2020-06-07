@@ -1,3 +1,6 @@
+## 0.6.0 2019-06-07
+* MODTAG-38 Update to RMB v30.0.2
+
 ## 0.5.0 2019-11-28
  * MODTAG-34 Upgrade to RMB v29.0.1
  * FOLIO-2358 Use new base docker image and new JAVA_OPTIONS MaxRAMPercentage
