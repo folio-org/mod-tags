@@ -17,8 +17,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
 
-    <domain-models-runtime.version>30.0.0</domain-models-runtime.version>
-    <vertx-version>3.9.0</vertx-version>
+    <domain-models-runtime.version>30.0.2</domain-models-runtime.version>
+    <vertx-version>3.9.1</vertx-version>
 
     <junit.version>4.12</junit.version>
     <rest-assured.version>2.8.0</rest-assured.version>
