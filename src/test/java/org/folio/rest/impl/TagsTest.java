@@ -1,11 +1,11 @@
 package org.folio.rest.impl;
 
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.core.AnyOf.anyOf;
 import static org.hamcrest.Matchers.is;
 
-import com.jayway.restassured.RestAssured;
-import static com.jayway.restassured.RestAssured.given;
-import com.jayway.restassured.response.Header;
+import io.restassured.RestAssured;
+import io.restassured.http.Header;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
@@ -145,19 +145,19 @@ public class TagsTest {
       .body(containsString("\"totalRecords\" : " + TAGS.size()));
 
     // Check sample data
-    TAGS.forEach((key, value) -> {
+    TAGS.forEach((key, value) ->
       given().header(TEN).get("/tags/" + key)
-        .then().log().ifValidationFails()
-        .statusCode(200)
-        .body(containsString(value));
-    });
+      .then().log().ifValidationFails()
+      .statusCode(200)
+      .body(containsString(value))
+    );
 
     // Remove sample data
-    TAGS.keySet().forEach(key -> {
+    TAGS.keySet().forEach(key ->
       given().header(TEN).delete("/tags/" + key)
-        .then().log().ifValidationFails()
-        .statusCode(204);
-    });
+      .then().log().ifValidationFails()
+      .statusCode(204)
+    );
 
     logger.info("Empty list of tags");
     given()
