@@ -1,3 +1,7 @@
+## 0.7.1 2020-10-23
+ * Fix logging issue
+ * Update RMB to v31.1.2 and Vertx to 3.9.3
+
 ## 0.7.0 2020-10-06
 * MODTAG-39 Migrate to JDK 11 and RMB v31.x
 
