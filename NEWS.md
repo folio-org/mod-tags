@@ -1,4 +1,8 @@
 ## 0.7.1 2020-10-23
+* Update copyright year FOLIO-1021
+* Update RMB to v31.1.5 and Vertx to 3.9.4
+
+## 0.7.1 2020-10-23
  * Fix logging issue
  * Update RMB to v31.1.2 and Vertx to 3.9.3
 
