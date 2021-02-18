@@ -1,8 +1,23 @@
 package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.core.AnyOf.anyOf;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.AnyOf.anyOf;
+
+import java.util.Map;
+import java.util.UUID;
+import org.apache.commons.collections15.map.HashedMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.rest.RestVerticle;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.tools.PomReader;
+import org.folio.rest.tools.client.test.HttpClientMock2;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import io.restassured.RestAssured;
 import io.restassured.http.Header;
@@ -11,26 +26,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.commons.collections15.map.HashedMap;
-import org.folio.rest.RestVerticle;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.PomReader;
-import org.folio.rest.tools.client.test.HttpClientMock2;
-import static org.hamcrest.Matchers.containsString;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Unit tests for mod-tags.
@@ -42,7 +40,7 @@ import org.junit.runner.RunWith;
 @RunWith(VertxUnitRunner.class)
 public class TagsTest {
 
-  private final Logger logger = LoggerFactory.getLogger("TagsTest");
+  private final Logger logger = LogManager.getLogger("TagsTest");
   private final int port = Integer.parseInt(System.getProperty("port", "8081"));
   private final Header TEN = new Header("X-Okapi-Tenant", "testlib");
   private final String USERID7 = "77777777-7777-7777-7777-777777777777";
@@ -63,7 +61,7 @@ public class TagsTest {
   }
 
   @Before
-  public void setUp(TestContext context) throws IOException {
+  public void setUp(TestContext context) {
     vertx = Vertx.vertx();
     moduleName = PomReader.INSTANCE.getModuleName()
       .replaceAll("_", "-");  // Rmb returns a 'normalized' name, with underscores
@@ -99,7 +97,7 @@ public class TagsTest {
   }
 
   @Test
-  public void tests(TestContext context) throws  Exception {
+  public void tests(TestContext context) {
     async = context.async();
     logger.info("tagsTest starting ==== ");  // search for ==== in mvn output
 

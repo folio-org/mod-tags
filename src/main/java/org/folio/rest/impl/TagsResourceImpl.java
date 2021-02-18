@@ -5,16 +5,9 @@ import static io.vertx.core.Future.succeededFuture;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.ws.rs.core.Response;
-
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.json.Json;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.cql2pgjson.CQL2PgJSON;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
@@ -31,8 +24,13 @@ import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.rest.tools.utils.ValidationHelper;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.json.Json;
+
 public class TagsResourceImpl implements Tags {
-  private final Logger logger = LoggerFactory.getLogger("mod-tags");
+  private final Logger logger = LogManager.getLogger("mod-tags");
   private final Messages messages = Messages.getInstance();
   private static final String TAGS_TABLE = "tags";
   private static final String LOCATION_PREFIX = "/tags/";
@@ -46,8 +44,7 @@ public class TagsResourceImpl implements Tags {
                       Context vertxContext) {
 
     try {
-      logger.debug("Getting tags. "
-        + offset + "+" + limit + " q=" + query);
+      logger.debug("Getting tags. {}+{} q={}", offset, limit, query);
       CQLWrapper cql = new CQLWrapper(new CQL2PgJSON(TAGS_TABLE + ".jsonb"), query, limit, offset);
       PgUtil.postgresClient(vertxContext, okapiHeaders)
         .get(TAGS_TABLE, Tag.class, new String[] {"*"}, cql,
@@ -147,10 +144,13 @@ public class TagsResourceImpl implements Tags {
                           String lang, Tag entity, Map<String, String> okapiHeaders,
                           Handler<AsyncResult<Response>> asyncResultHandler,
                           Context vertxContext) {
-    logger.info("PUT tag " + id + " " + Json.encode(entity));
+    if (logger.isInfoEnabled()) {
+      logger.info("PUT tag {} {}", id, Json.encode(entity));
+    }
+
     String noteId = entity.getId();
     if (noteId != null && !noteId.equals(id)) {
-      logger.error("Trying to change tag Id from " + id + " to " + noteId);
+      logger.error("Trying to change tag Id from {} to {}", id, noteId);
       Errors valErr = ValidationHelper.createValidationErrorMessage("id", noteId,
         "Can not change the id");
       asyncResultHandler.handle(succeededFuture(PutTagsByIdResponse
