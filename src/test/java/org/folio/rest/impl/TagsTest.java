@@ -2,15 +2,22 @@ package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.AnyOf.anyOf;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import org.apache.commons.collections15.map.HashedMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.client.TenantClient;
+import org.folio.rest.jaxrs.model.Parameter;
+import org.folio.rest.jaxrs.model.TenantAttributes;
+import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.client.test.HttpClientMock2;
@@ -20,11 +27,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.filter.log.LogDetail;
 import io.restassured.http.Header;
+import io.restassured.specification.RequestSpecification;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -42,16 +51,17 @@ public class TagsTest {
 
   private final Logger logger = LogManager.getLogger("TagsTest");
   private final int port = Integer.parseInt(System.getProperty("port", "8081"));
-  private final Header TEN = new Header("X-Okapi-Tenant", "testlib");
+  private final String TENANT = "testlib";
+  private final String TOKEN = "token";
+  private final int TENANT_OP_WAITINGTIME = 60000;
+  private final Header TEN = new Header("X-Okapi-Tenant", TENANT);
   private final String USERID7 = "77777777-7777-7777-7777-777777777777";
   private final Header USER7 = new Header("X-Okapi-User-Id", USERID7);
-  private final Header JSON = new Header("Content-Type", "application/json");
-  private final Header X_OKAPI_URL_TO = new Header("X-Okapi-Url-to", "http://localhost:" + port);
-  private String moduleName; // "mod-tags";
-  private String moduleVersion; // "0.2.0-SNAPSHOT";
+  private final String OKAPI_URL = "http://localhost:" + port;
   private String moduleId; // "mod-tags-0.2.0-SNAPSHOT"
-  Vertx vertx;
-  Async async;
+  private Vertx vertx;
+  private Async async;
+  private RequestSpecification spec;
 
   // sample tags from sample-data directory
   private static final Map<String, String> TAGS = new HashedMap<>();
@@ -63,13 +73,38 @@ public class TagsTest {
   @Before
   public void setUp(TestContext context) {
     vertx = Vertx.vertx();
-    moduleName = PomReader.INSTANCE.getModuleName()
+    // "mod-tags";
+    String moduleName = PomReader.INSTANCE.getModuleName()
       .replaceAll("_", "-");  // Rmb returns a 'normalized' name, with underscores
-    moduleVersion = PomReader.INSTANCE.getVersion();
+    // "0.2.0-SNAPSHOT";
+    String moduleVersion = PomReader.INSTANCE.getVersion();
     moduleId = moduleName + "-" + moduleVersion;
 
     logger.info("Test setup starting for " + moduleId);
 
+    try {
+      PostgresClient.setIsEmbedded(true);
+      PostgresClient.getInstance(vertx);
+    } catch (Exception e) {
+      context.fail(e);
+    }
+
+    RestAssured.port = port;
+
+    spec = new RequestSpecBuilder()
+      .setBaseUri("http://localhost:" + port)
+      .setPort(port)
+      .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+      .addHeader(RestVerticle.OKAPI_HEADER_TENANT, TENANT)
+      .addHeader(RestVerticle.OKAPI_HEADER_TOKEN, TOKEN)
+      .addHeader(XOkapiHeaders.URL, OKAPI_URL)
+      .log(LogDetail.ALL)
+      .build();
+
+    deployVerticleWithTenant();
+  }
+
+  public void deployVerticleWithTenant() {
     JsonObject conf = new JsonObject()
       .put(HttpClientMock2.MOCK_MODE, "true")
       .put("http.port", port);
@@ -77,12 +112,41 @@ public class TagsTest {
     logger.info("tagsTest: Deploying "
       + RestVerticle.class.getName() + " "
       + Json.encode(conf));
-    DeploymentOptions opt = new DeploymentOptions()
+
+    DeploymentOptions options = new DeploymentOptions()
       .setConfig(conf);
-    vertx.deployVerticle(RestVerticle.class.getName(),
-      opt, context.asyncAssertSuccess());
-    RestAssured.port = port;
-    logger.info("tagsTest: setup done. Using port " + port);
+
+    CompletableFuture<Void> future = new CompletableFuture<>();
+    vertx.deployVerticle(RestVerticle.class.getName(), options, event -> {
+      TenantClient tenantClient = new TenantClient(OKAPI_URL, TENANT, TOKEN);
+      try {
+        List<Parameter> params = List.of(
+          new Parameter().withKey("loadReference").withValue("true"),
+          new Parameter().withKey("loadSample").withValue("true")
+        );
+        TenantAttributes ta = new TenantAttributes()
+          .withModuleTo(moduleId)
+          .withParameters(params);
+
+        tenantClient.postTenant(ta, res1 -> {
+          if (res1.succeeded()) {
+            String jobId = res1.result().bodyAsJson(TenantJob.class).getId();
+            tenantClient.getTenantByOperationId(jobId, TENANT_OP_WAITINGTIME, res2 -> {
+              if (res2.succeeded()) {
+                future.complete(null);
+              } else {
+                future.completeExceptionally(new IllegalStateException("Failed to get tenant"));
+              }
+            });
+          } else {
+            future.completeExceptionally(new IllegalStateException("Failed to create tenant job"));
+          }
+        });
+      } catch (Exception e) {
+        future.completeExceptionally(e);
+      }
+    });
+    future.join();
   }
 
   @After
@@ -106,37 +170,15 @@ public class TagsTest {
 
     // Simple GET request to see the module is running and we can talk to it.
     given()
+      .spec(spec)
       .get("/admin/health")
       .then().log().ifValidationFails()
       .statusCode(200);
 
-    // Delete the tenant schema from any previous test run
-    given()
-    .header(TEN).header(USER7).header(X_OKAPI_URL_TO)
-    .delete("/_/tenant")
-    .then().log().ifValidationFails()
-    .statusCode(anyOf(is(204), is(400)));  // deleted, or doen't exist
-
-    // Call the tenant interface to initialize the database and load sample data
-    JsonArray ar = new JsonArray();
-    ar.add(new JsonObject().put("key", "loadReference").put("value", "true"));
-    ar.add(new JsonObject().put("key", "loadSample").put("value", "true"));
-    JsonObject jo = new JsonObject();
-    jo.put("parameters", ar);
-    jo.put("module_to", moduleId);
-    logger.info("About to call the tenant interface " + jo.encodePrettily());
-    given()
-      .header(TEN).header(USER7).header(X_OKAPI_URL_TO).header(JSON)
-      .body(jo.encode())
-      .post("/_/tenant")
-      .then().log().ifValidationFails()
-      .statusCode(201);
-    logger.info("Tenant interface ok ====");
-
     // Check sample data size
     logger.info("List of sample tags");
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags")
       .then().log().ifValidationFails()
       .statusCode(200)
@@ -144,15 +186,17 @@ public class TagsTest {
 
     // Check sample data
     TAGS.forEach((key, value) ->
-      given().header(TEN).get("/tags/" + key)
-      .then().log().ifValidationFails()
-      .statusCode(200)
-      .body(containsString(value))
+      given()
+        .spec(spec)
+        .get("/tags/" + key)
+        .then().log().ifValidationFails()
+        .statusCode(200)
+        .body(containsString(value))
     );
 
     // Remove sample data
     TAGS.keySet().forEach(key ->
-      given().header(TEN).delete("/tags/" + key)
+      given().spec(spec).delete("/tags/" + key)
       .then().log().ifValidationFails()
       .statusCode(204)
     );
@@ -171,7 +215,7 @@ public class TagsTest {
             + "\"label\" : \"First tag\", "
             + "\"description\" : \"This is the first test tag\" }";
     given()
-      .header(TEN).header(JSON)
+      .spec(spec)
       .body(tag1)
       .post("/tags")
       .then().log().ifValidationFails()
@@ -180,7 +224,7 @@ public class TagsTest {
 
     logger.info("List of that one tag");
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags")
       .then().log().ifValidationFails()
       .statusCode(200)
@@ -189,7 +233,7 @@ public class TagsTest {
 
     logger.info("Get that one tag by id");
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags/" + id1)
       .then().log().ifValidationFails()
       .statusCode(200)
@@ -200,7 +244,7 @@ public class TagsTest {
             + "\"label\" : \"First tag\", "
             + "\"description\" : \"This is the UPDATED test tag\" }";
     given()
-      .header(TEN).header(JSON)
+      .spec(spec)
       .body(tag2)
       .put("/tags/" + id1)
       .then().log().ifValidationFails()
@@ -208,21 +252,21 @@ public class TagsTest {
 
     logger.info("Delete that one tag by id");
     given()
-      .header(TEN)
+      .spec(spec)
       .delete("/tags/" + id1)
       .then().log().ifValidationFails()
       .statusCode(204);
 
     logger.info("See that it is gone");
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags/" + id1)
       .then().log().ifValidationFails()
       .statusCode(404);
 
     logger.info("Try to delete it again");
     given()
-      .header(TEN)
+      .spec(spec)
       .delete("/tags/" + id1)
       .then().log().ifValidationFails()
       .statusCode(404);
@@ -231,7 +275,7 @@ public class TagsTest {
     logger.info("Bad UUID");
     String badUuid = tag1.replaceAll("-", "XXX");
     given()
-      .header(TEN).header(JSON)
+      .spec(spec)
       .body(badUuid)
       .post("/tags")
       .then().log().ifValidationFails()
@@ -240,14 +284,14 @@ public class TagsTest {
 
     logger.info("Get by wrong id");
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags/" + UUID.randomUUID().toString())
       .then().log().ifValidationFails()
       .statusCode(404);
 
     logger.info("Get by bad id");
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags/9999-BAD-UUID-9999")
       .then().log().ifValidationFails()
       .statusCode(400);
@@ -255,7 +299,7 @@ public class TagsTest {
     logger.info("Unknown field");
     String UnknownField = tag1.replaceAll("description", "unknownField");
     given()
-      .header(TEN).header(JSON)
+      .spec(spec)
       .body(UnknownField)
       .post("/tags")
       .then().log().ifValidationFails()
@@ -264,7 +308,7 @@ public class TagsTest {
 
     logger.info("Put tag1 back in the database");
     given()
-      .header(TEN).header(JSON)
+      .spec(spec)
       .body(tag1)
       .post("/tags")
       .then().log().ifValidationFails()
@@ -275,7 +319,7 @@ public class TagsTest {
     String newId = UUID.randomUUID().toString();
     String changeId = tag1.replaceAll(id1.toString(), newId);
     given()
-      .header(TEN).header(JSON)
+      .spec(spec)
       .body(changeId)
       .put("/tags/" + id1)
       .then().log().ifValidationFails()
@@ -284,7 +328,7 @@ public class TagsTest {
 
     logger.info("PUT to non-existing");
     given()
-      .header(TEN).header(JSON)
+      .spec(spec)
       .body(changeId)
       .put("/tags/" + newId)
       .then().log().ifValidationFails()
@@ -292,7 +336,7 @@ public class TagsTest {
 
     logger.info("Post tag with duplicated label");
     given()
-      .header(TEN).header(JSON)
+      .spec(spec)
       .body("{\"label\" : \"first tag\", \"description\" : \"I'm the duplicate!\" }")
       .post("/tags")
       .then().log().ifValidationFails()
@@ -304,7 +348,7 @@ public class TagsTest {
     String second = "{ \"label\":\"second tag\"}";
     logger.info(second);
     given()
-      .header(TEN).header(JSON).header(USER7)
+      .spec(spec).header(USER7)
       .body(second)
       .post("/tags")
       .then().log().ifValidationFails()
@@ -317,7 +361,7 @@ public class TagsTest {
       + "\"description\" : \"Tag number three\"}";
     logger.info(third);
     given()
-      .header(TEN).header(JSON)
+      .spec(spec)
       .body(third)
       .post("/tags")
       .then().log().ifValidationFails()
@@ -327,7 +371,7 @@ public class TagsTest {
       + "\"description\" : \"Tag number FOUR\"}";
     logger.info(fourth);
     given()
-      .header(TEN).header(JSON).header(USER7)
+      .spec(spec).header(USER7)
       .body(fourth)
       .post("/tags")
       .then().log().ifValidationFails()
@@ -336,7 +380,7 @@ public class TagsTest {
     // Part 5: Test queries and limits
     logger.info("List test tags");
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags")
       .then().log().ifValidationFails()
       .statusCode(200)
@@ -344,7 +388,7 @@ public class TagsTest {
 
     logger.info("query");
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags?query=label=tag")
       .then().log().ifValidationFails()
       .statusCode(200)
@@ -352,7 +396,7 @@ public class TagsTest {
 
     logger.info("second query");
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags?query=label=second")
       .then().log().ifValidationFails()
       .statusCode(200)
@@ -360,7 +404,7 @@ public class TagsTest {
 
     logger.info("metadata query");
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags?query=metadata.createdByUserId=" + USERID7)
       .then().log().ifValidationFails()
       .statusCode(200)
@@ -368,21 +412,21 @@ public class TagsTest {
 
     logger.info("query");
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags?query=label=tag&offset=2&limit=1")
       .then().log().ifValidationFails()
       .statusCode(200)
       .body(containsString("\"totalRecords\" : 4"));
 
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags?query=label=tag&offset=2&limit=101")
       .then().log().ifValidationFails()
       .statusCode(200)
       .body(containsString("\"totalRecords\" : 4"));
 
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags?query=label=tag&offset=2&limit=-1")
       .then().log().ifValidationFails()
       .statusCode(400);
@@ -390,7 +434,7 @@ public class TagsTest {
     logger.info("Substring search, empty string, ==");
     // Matches all that have a description not defined
     given()
-      .header(TEN)
+      .spec(spec)
       .get("/tags?query=cql.allRecords=1 NOT description=\"\"")
       .then().log().ifValidationFails()
       .statusCode(200)
@@ -402,6 +446,5 @@ public class TagsTest {
     async.complete();
 
   }
-
 
 }
