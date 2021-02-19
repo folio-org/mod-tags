@@ -1,59 +1,32 @@
 package org.folio.rest.impl;
 
 import java.util.Map;
-import javax.ws.rs.core.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.TenantAttributes;
-
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.tools.utils.TenantLoading;
+
+import io.vertx.core.Context;
+import io.vertx.core.Future;
 
 public class TenantRefAPI extends TenantAPI {
 
+  private static final Logger log = LogManager.getLogger(TenantRefAPI.class);
+
   private static final String SAMPLE_LEAD = "sample-data";
   private static final String SAMPLE_KEY = "loadSample";
-  private static final Logger log = LoggerFactory.getLogger(TenantRefAPI.class);
 
   @Override
-  public void postTenant(TenantAttributes ta, Map<String, String> headers,
-    Handler<AsyncResult<Response>> hndlr, Context cntxt) {
-    log.info("postTenant");
-    Vertx vertx = cntxt.owner();
-    super.postTenant(ta, headers, res -> {
-      if (res.failed()) {
-        hndlr.handle(res);
-        return;
-      }
-      TenantLoading tl = new TenantLoading()
-        .withKey(SAMPLE_KEY)
-        .withLead(SAMPLE_LEAD)
-        .withIdContent()
-        .add("", "tags");
-      tl.perform(ta, headers, vertx, res1 -> {
-        if (res1.failed()) {
-          hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-            .respond500WithTextPlain(res1.cause().getLocalizedMessage())));
-          return;
-        }
-        hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-          .respond201WithApplicationJson("")));
+  Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
+    return super.loadData(attributes, tenantId, headers, vertxContext)
+      .compose(recordsLoaded -> {
+        log.info("Loading sample data from {}", SAMPLE_LEAD);
+
+        return new TenantLoading()
+          .withKey(SAMPLE_KEY).withLead(SAMPLE_LEAD)
+          .withIdContent()
+          .add("", "tags")
+          .perform(attributes, headers, vertxContext, recordsLoaded);
       });
-    }, cntxt);
-  }
-
-  @Override
-  public void getTenant(Map<String, String> map, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
-    log.info("getTenant");
-    super.getTenant(map, hndlr, cntxt);
-  }
-
-  @Override
-  public void deleteTenant(Map<String, String> map, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
-    log.info("deleteTenant");
-    super.deleteTenant(map, hndlr, cntxt);
   }
 }

@@ -1,11 +1,8 @@
 package org.folio.rest.impl;
 
 import static org.folio.rest.impl.TagsResourceImpl.extractFromSingleQuotes;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-
-import javax.ws.rs.core.Response;
 
 import org.junit.Test;
 

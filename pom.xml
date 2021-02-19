@@ -17,11 +17,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
 
-    <domain-models-runtime.version>31.1.5</domain-models-runtime.version>
-    <vertx-version>3.9.4</vertx-version>
+    <domain-models-runtime.version>32.1.0</domain-models-runtime.version>
+    <vertx-version>4.0.0</vertx-version>
 
-    <junit.version>4.13</junit.version>
-    <rest-assured.version>4.3.1</rest-assured.version>
+    <junit.version>4.13.1</junit.version>
+    <rest-assured.version>4.3.3</rest-assured.version>
     <aspectj.version>1.9.6</aspectj.version>
   </properties>
 
@@ -177,7 +177,7 @@
         <configuration>
           <verbose>true</verbose>
           <showWeaveInfo>false</showWeaveInfo>
-          <complianceLevel>1.8</complianceLevel>
+          <complianceLevel>11</complianceLevel>
           <XaddSerialVersionUID>true</XaddSerialVersionUID>
           <aspectLibraries>
             <aspectLibrary>
@@ -349,6 +349,7 @@
                   <manifestEntries>
                     <Main-Class>org.folio.rest.RestLauncher</Main-Class>
                     <Main-Verticle>org.folio.rest.RestVerticle</Main-Verticle>
+                    <Multi-Release>true</Multi-Release>
                   </manifestEntries>
                 </transformer>
               </transformers>
