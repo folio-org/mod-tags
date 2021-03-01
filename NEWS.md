@@ -1,4 +1,8 @@
-## 0.7.1 2020-10-23
+## 0.7.3 2021-03-01
+* MODTAG-49 Upgrade mod-tags to RMB 32.x and Vert.x 4
+* Use api-lint FOLIO-2893
+
+## 0.7.2 2020-11-03
 * Update copyright year FOLIO-1021
 * Update RMB to v31.1.5 and Vertx to 3.9.4
 
