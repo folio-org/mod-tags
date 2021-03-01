@@ -1,4 +1,4 @@
-## 0.7.3 2021-03-01
+## 0.8.0 2021-03-01
 * MODTAG-49 Upgrade mod-tags to RMB 32.x and Vert.x 4
 * Use api-lint FOLIO-2893
 
