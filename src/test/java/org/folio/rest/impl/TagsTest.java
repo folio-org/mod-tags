@@ -3,28 +3,14 @@ package org.folio.rest.impl;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import org.apache.commons.collections15.map.HashedMap;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.folio.okapi.common.XOkapiHeaders;
-import org.folio.rest.RestVerticle;
-import org.folio.rest.client.TenantClient;
-import org.folio.rest.jaxrs.model.Parameter;
-import org.folio.rest.jaxrs.model.TenantAttributes;
-import org.folio.rest.jaxrs.model.TenantJob;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.PomReader;
-import org.folio.rest.tools.client.test.HttpClientMock2;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -38,12 +24,26 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.folio.okapi.common.XOkapiHeaders;
+import org.folio.postgres.testing.PostgresTesterContainer;
+import org.folio.rest.RestVerticle;
+import org.folio.rest.client.TenantClient;
+import org.folio.rest.jaxrs.model.Parameter;
+import org.folio.rest.jaxrs.model.TenantAttributes;
+import org.folio.rest.jaxrs.model.TenantJob;
+import org.folio.rest.persist.PostgresClient;
 
 /**
  * Unit tests for mod-tags.
  * Tags is a simple module, so the test are pretty simple too. We run against
- * the embedded postgres (by default on port 9248,
- * unlikely to collide with * a real postgress, or anything else), so we always start from a clean slate,
+ * the test containers postgres, so we always start from a clean slate,
  * and there is no need to clean up afterwards.
  */
 @RunWith(VertxUnitRunner.class)
@@ -58,13 +58,14 @@ public class TagsTest {
   private final String USERID7 = "77777777-7777-7777-7777-777777777777";
   private final Header USER7 = new Header("X-Okapi-User-Id", USERID7);
   private final String OKAPI_URL = "http://localhost:" + port;
-  private String moduleId; // "mod-tags-0.2.0-SNAPSHOT"
+  private String moduleId;
   private Vertx vertx;
   private Async async;
   private RequestSpecification spec;
 
   // sample tags from sample-data directory
-  private static final Map<String, String> TAGS = new HashedMap<>();
+  private static final Map<String, String> TAGS = new HashMap<>();
+
   static {
     TAGS.put("c3799dc5-500b-44dd-8e17-2f2354cc43e3", "urgent");
     TAGS.put("d3c8b511-41e7-422e-a483-18778d0596e5", "important");
@@ -73,18 +74,11 @@ public class TagsTest {
   @Before
   public void setUp(TestContext context) {
     vertx = Vertx.vertx();
-    // "mod-tags";
-    String moduleName = PomReader.INSTANCE.getModuleName()
-      .replaceAll("_", "-");  // Rmb returns a 'normalized' name, with underscores
-    // "0.2.0-SNAPSHOT";
-    String moduleVersion = PomReader.INSTANCE.getVersion();
-    moduleId = moduleName + "-" + moduleVersion;
-
-    logger.info("Test setup starting for " + moduleId);
+    moduleId = "mod-tags-0.1.0";
 
     try {
-      PostgresClient.setIsEmbedded(true);
-      PostgresClient.getInstance(vertx);
+      PostgresClient.setPostgresTester(new PostgresTesterContainer());
+      PostgresClient.getInstance(vertx).startPostgresTester();
     } catch (Exception e) {
       context.fail(e);
     }
@@ -106,7 +100,6 @@ public class TagsTest {
 
   public void deployVerticleWithTenant() {
     JsonObject conf = new JsonObject()
-      .put(HttpClientMock2.MOCK_MODE, "true")
       .put("http.port", port);
 
     logger.info("tagsTest: Deploying "
@@ -118,7 +111,7 @@ public class TagsTest {
 
     CompletableFuture<Void> future = new CompletableFuture<>();
     vertx.deployVerticle(RestVerticle.class.getName(), options, event -> {
-      TenantClient tenantClient = new TenantClient(OKAPI_URL, TENANT, TOKEN);
+      TenantClient tenantClient = new TenantClient(OKAPI_URL, TENANT, TOKEN, vertx.createHttpClient());
       try {
         List<Parameter> params = List.of(
           new Parameter().withKey("loadReference").withValue("true"),
@@ -153,7 +146,7 @@ public class TagsTest {
   public void tearDown(TestContext context) {
     logger.info("Cleaning up after tagsTest");
     async = context.async();
-    PostgresClient.stopEmbeddedPostgres();
+    PostgresClient.stopPostgresTester();
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       logger.info("tagsTest cleanup done");
       async.complete();
@@ -197,8 +190,8 @@ public class TagsTest {
     // Remove sample data
     TAGS.keySet().forEach(key ->
       given().spec(spec).delete("/tags/" + key)
-      .then().log().ifValidationFails()
-      .statusCode(204)
+        .then().log().ifValidationFails()
+        .statusCode(204)
     );
 
     logger.info("Empty list of tags");
@@ -212,8 +205,8 @@ public class TagsTest {
     // Part 2: Simple CRUD operations
     logger.info("Post a tag");
     String tag1 = "{\"id\" : \"" + id1 + "\", "
-            + "\"label\" : \"First tag\", "
-            + "\"description\" : \"This is the first test tag\" }";
+      + "\"label\" : \"First tag\", "
+      + "\"description\" : \"This is the first test tag\" }";
     given()
       .spec(spec)
       .body(tag1)
@@ -241,8 +234,8 @@ public class TagsTest {
 
     logger.info("Update the tag");
     String tag2 = "{\"id\" : \"" + id1 + "\", "
-            + "\"label\" : \"First tag\", "
-            + "\"description\" : \"This is the UPDATED test tag\" }";
+      + "\"label\" : \"First tag\", "
+      + "\"description\" : \"This is the UPDATED test tag\" }";
     given()
       .spec(spec)
       .body(tag2)
@@ -285,7 +278,7 @@ public class TagsTest {
     logger.info("Get by wrong id");
     given()
       .spec(spec)
-      .get("/tags/" + UUID.randomUUID().toString())
+      .get("/tags/" + UUID.randomUUID())
       .then().log().ifValidationFails()
       .statusCode(404);
 
