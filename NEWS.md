@@ -1,3 +1,7 @@
+## 0.9.0 2021-06-09
+* MODTAG-48 Add personal data disclosure form
+* MODTAG-53 Upgrade to RMB 33 and Vert.x 4.1.0.CR1
+
 ## 0.8.0 2021-03-01
 * MODTAG-49 Upgrade mod-tags to RMB 32.x and Vert.x 4
 * Use api-lint FOLIO-2893
