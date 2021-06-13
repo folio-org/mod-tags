@@ -14,9 +14,7 @@
         </preConditions>
 
         <addColumn tableName="tags">
-            <column name="label" type="VARCHAR(255)">
-                <constraints nullable="false" unique="true" uniqueConstraintName="unq_tags_label"/>
-            </column>
+            <column name="label" type="VARCHAR(255)"/>
             <column name="description" type="VARCHAR(255)"/>
             <column name="created_date" type="DATETIME" defaultValueComputed="now()">
                 <constraints nullable="false"/>
@@ -40,6 +38,11 @@
             <column name="updated_date" valueComputed="jsonb->'metadata'->>'updatedDate'"/>
             <column name="updated_by" valueComputed="jsonb->'metadata'->>'updatedByUserId'"/>
         </update>
+    </changeSet>
+
+    <changeSet id="MODTAG-52@@add-constraints-to-tags-label" author="psmagin">
+        <addNotNullConstraint tableName="tags" columnName="label"/>
+        <addUniqueConstraint tableName="tags" columnNames="label" constraintName="unq_tags_label"/>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-creation-date-column" author="psmagin">
