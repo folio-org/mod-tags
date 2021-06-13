@@ -28,7 +28,7 @@ public interface TagsMapper {
   @InheritInverseConfiguration
   Tag toEntity(TagDto dto);
 
-  default TagDtoCollection toDtoCollection(Page<Tag> entityList){
+  default TagDtoCollection toDtoCollection(Page<Tag> entityList) {
     return new TagDtoCollection().tags(toDtoList(entityList.getContent())).totalRecords(
       Math.toIntExact(entityList.getTotalElements()));
   }
@@ -49,18 +49,11 @@ public interface TagsMapper {
     return value != null ? OffsetDateTime.from(value.toInstant().atZone(ZoneId.systemDefault())) : null;
   }
 
-  default String map(UUID value){
+  default String map(UUID value) {
     return value != null ? value.toString() : null;
   }
 
-  default UUID map(String value){
+  default UUID map(String value) {
     return (StringUtils.isBlank(value)) ? null : UUID.fromString(value);
   }
-  //  default UUID stringToUUIDSafe(String uuid) {
-  //    return (StringUtils.isBlank(uuid)) ? null : UUID.fromString(uuid);
-  //  }
-  //
-  //  default String uuidToStringSafe(UUID uuid) {
-  //    return uuid != null ? uuid.toString() : null;
-  //  }
 }

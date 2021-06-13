@@ -19,6 +19,17 @@ public class TagsController implements TagsApi {
   private final TagService tagService;
 
   @Override
+  public ResponseEntity<Void> deleteTagById(String id) {
+    tagService.removeTagById(UUID.fromString(id));
+    return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<TagDto> getTagById(String id) {
+    return ResponseEntity.ok(tagService.fetchTagById(UUID.fromString(id)));
+  }
+
+  @Override
   public ResponseEntity<TagDtoCollection> getTagCollection(String query, Integer offset, Integer limit) {
     return ResponseEntity.ok(tagService.fetchTagCollection(query, offset, limit));
   }
@@ -30,19 +41,8 @@ public class TagsController implements TagsApi {
   }
 
   @Override
-  public ResponseEntity<TagDto> getTagById(String id) {
-    return ResponseEntity.ok(tagService.fetchTagById(UUID.fromString(id)));
-  }
-
-  @Override
   public ResponseEntity<Void> putTagById(String id, TagDto tag) {
     tagService.updateTag(UUID.fromString(id), tag);
-    return ResponseEntity.noContent().build();
-  }
-
-  @Override
-  public ResponseEntity<Void> deleteTagById(String id) {
-    tagService.removeTagById(UUID.fromString(id));
     return ResponseEntity.noContent().build();
   }
 }

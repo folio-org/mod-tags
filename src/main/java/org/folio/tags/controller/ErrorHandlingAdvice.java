@@ -4,13 +4,8 @@ import static org.folio.tags.util.ErrorsHelper.ErrorCode.NOT_FOUND_ERROR;
 import static org.folio.tags.util.ErrorsHelper.ErrorCode.VALIDATION_ERROR;
 import static org.folio.tags.util.ErrorsHelper.createInternalError;
 import static org.folio.tags.util.ErrorsHelper.createUnknownError;
-import static org.folio.tags.util.ErrorsHelper.createValidationErrorMessage;
-
-import java.util.Set;
 
 import javax.persistence.EntityNotFoundException;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.StringUtils;
