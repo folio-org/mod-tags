@@ -32,14 +32,22 @@
         <update tableName="tags">
             <column name="label" valueComputed="jsonb->>'label'"/>
             <column name="description" valueComputed="jsonb->>'description'"/>
-            <column name="created_date" valueComputed="jsonb->'metadata'->>'createdDate'"/>
-            <column name="created_by" valueComputed="jsonb->'metadata'->>'createdByUserId'"/>
+            <column name="created_date"
+                    valueComputed="to_timestamp(jsonb->'metadata'->>'createdDate', 'YYYY-MM-DD&quot;T&quot;HH24:MI:SS.MS')"/>
+            <column name="created_by" valueComputed="(jsonb->'metadata'->>'createdByUserId')::uuid"/>
             <column name="updated_date" valueComputed="jsonb->'metadata'->>'updatedDate'"/>
-            <column name="updated_by" valueComputed="jsonb->'metadata'->>'updatedByUserId'"/>
+            <column name="updated_date"
+                    valueComputed="to_timestamp(jsonb->'metadata'->>'updatedDate', 'YYYY-MM-DD&quot;T&quot;HH24:MI:SS.MS')"/>
+            <column name="updated_by" valueComputed="(jsonb->'metadata'->>'updatedByUserId')::uuid"/>
         </update>
     </changeSet>
 
     <changeSet id="MODTAG-52@@add-constraints-to-tags-label" author="psmagin">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="tags" columnNames="label"/>
+            </not>
+        </preConditions>
         <addNotNullConstraint tableName="tags" columnName="label"/>
         <addUniqueConstraint tableName="tags" columnNames="label" constraintName="unq_tags_label"/>
     </changeSet>
