@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+
+    <changeSet id="MODTAG-52@@create-tags-label-index" author="psmagin">
+        <createIndex tableName="tags" indexName="idx_tags_label">
+            <column name="label"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="MODTAG-52@@populate-initial-tags" author="psmagin" failOnError="false">
+        <insert tableName="tags">
+            <column name="label" value="important"/>
+        </insert>
+        <insert tableName="tags">
+            <column name="label" value="urgent"/>
+            <column name="description" value="Requires urgent attention"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

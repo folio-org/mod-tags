@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="MODTAG-52@@update-tags-table-if-exists" author="psmagin">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tags"/>
+                <columnExists tableName="tags" columnName="jsonb"/>
+            </and>
+        </preConditions>
+
+        <addColumn tableName="tags">
+            <column name="label" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="unq_tags_label"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="created_date" type="DATETIME" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="UUID"/>
+            <column name="updated_date" type="DATETIME"/>
+            <column name="updated_by" type="UUID"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="MODTAG-52@@migrate-tags-from-jsonb" author="psmagin">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="tags" columnName="jsonb"/>
+        </preConditions>
+
+        <update tableName="tags">
+            <column name="label" valueComputed="jsonb->>'label'"/>
+            <column name="description" valueComputed="jsonb->>'description'"/>
+            <column name="created_date" valueComputed="jsonb->'metadata'->>'createdDate'"/>
+            <column name="created_by" valueComputed="jsonb->'metadata'->>'createdByUserId'"/>
+            <column name="updated_date" valueComputed="jsonb->'metadata'->>'updatedDate'"/>
+            <column name="updated_by" valueComputed="jsonb->'metadata'->>'updatedByUserId'"/>
+        </update>
+    </changeSet>
+
+    <changeSet id="MODTAG-52@@drop-creation-date-column" author="psmagin">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="tags" columnName="creation_date"/>
+        </preConditions>
+
+        <dropColumn tableName="tags" columnName="creation_date"/>
+    </changeSet>
+
+    <changeSet id="MODTAG-52@@drop-jsonb-column" author="psmagin">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="tags" columnName="jsonb"/>
+        </preConditions>
+
+        <dropColumn tableName="tags" columnName="jsonb"/>
+    </changeSet>
+</databaseChangeLog>
