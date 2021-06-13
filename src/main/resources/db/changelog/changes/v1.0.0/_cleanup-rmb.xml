@@ -17,6 +17,9 @@
     <changeSet id="MODPWD-64@@drop-rmb-internal-index-table" author="psmagin">
         <sql dbms="postgresql">DROP TABLE IF EXISTS rmb_internal_index</sql>
     </changeSet>
+    <changeSet id="MODPWD-64@@drop-tags_label_idx_unique-index" author="psmagin">
+        <sql dbms="postgresql">DROP INDEX IF EXISTS tags_label_idx_unique</sql>
+    </changeSet>
     <changeSet id="MODPWD-64@@drop-count_estimate_smart2-function" author="psmagin">
         <sql dbms="postgresql">DROP FUNCTION IF EXISTS count_estimate_smart2</sql>
     </changeSet>
@@ -71,10 +74,10 @@
     <changeSet id="MODPWD-64@@drop-set_id_in_jsonb-function" author="psmagin">
         <sql dbms="postgresql">DROP FUNCTION IF EXISTS set_id_in_jsonb CASCADE</sql>
     </changeSet>
-    <changeSet id="MODPWD-64@@drop-validation_rules_set_md-function" author="psmagin">
+    <changeSet id="MODPWD-64@@drop-tags_set_md-function" author="psmagin">
         <sql dbms="postgresql">DROP FUNCTION IF EXISTS tags_set_md CASCADE</sql>
     </changeSet>
-    <changeSet id="MODPWD-64@@drop-set_validation_rules_md_json-function" author="psmagin">
+    <changeSet id="MODPWD-64@@drop-set_tags_md_json-function" author="psmagin">
         <sql dbms="postgresql">DROP FUNCTION IF EXISTS set_tags_md_json CASCADE</sql>
     </changeSet>
     <changeSet id="MODPWD-64@@drop-f_unaccent-function" author="psmagin">
