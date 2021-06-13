@@ -19,7 +19,6 @@
             <column name="created_date" type="DATETIME" defaultValueComputed="now()">
                 <constraints nullable="false"/>
             </column>
-            <column name="created_by" type="UUID"/>
             <column name="updated_date" type="DATETIME"/>
             <column name="updated_by" type="UUID"/>
         </addColumn>

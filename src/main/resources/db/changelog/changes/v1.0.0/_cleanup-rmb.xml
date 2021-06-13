@@ -8,6 +8,9 @@
     <changeSet id="MODPWD-64@@drop-old-validation-rules-table" author="psmagin">
         <sql dbms="postgresql">DROP TABLE IF EXISTS validation_rules</sql>
     </changeSet>
+    <changeSet id="MODPWD-64@@drop-rmb-job-table" author="psmagin">
+        <sql dbms="postgresql">DROP TABLE IF EXISTS rmb_job</sql>
+    </changeSet>
     <changeSet id="MODPWD-64@@drop-rmb-internal-table" author="psmagin">
         <sql dbms="postgresql">DROP TABLE IF EXISTS rmb_internal</sql>
     </changeSet>
