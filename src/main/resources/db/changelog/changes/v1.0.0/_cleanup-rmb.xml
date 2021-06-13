@@ -69,13 +69,13 @@
         <sql dbms="postgresql">DROP FUNCTION IF EXISTS concat_space_sql</sql>
     </changeSet>
     <changeSet id="MODPWD-64@@drop-set_id_in_jsonb-function" author="psmagin">
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS set_id_in_jsonb</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS set_id_in_jsonb CASCADE</sql>
     </changeSet>
     <changeSet id="MODPWD-64@@drop-validation_rules_set_md-function" author="psmagin">
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS validation_rules_set_md</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS tags_set_md CASCADE</sql>
     </changeSet>
     <changeSet id="MODPWD-64@@drop-set_validation_rules_md_json-function" author="psmagin">
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS set_validation_rules_md_json</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS set_tags_md_json CASCADE</sql>
     </changeSet>
     <changeSet id="MODPWD-64@@drop-f_unaccent-function" author="psmagin">
         <sql dbms="postgresql">DROP FUNCTION IF EXISTS f_unaccent</sql>
