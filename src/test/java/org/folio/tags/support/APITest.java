@@ -11,19 +11,19 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.TestPropertySourceUtils;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.folio.spring.FolioModuleMetadata;
@@ -31,10 +31,10 @@ import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.tenant.domain.dto.TenantAttributes;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(initializers = APITest.DockerPostgreDataSourceInitializer.class)
+@ContextConfiguration
 @AutoConfigureMockMvc
 @Testcontainers
+@DirtiesContext
 public abstract class APITest {
 
   protected static final String TOKEN =
@@ -44,6 +44,7 @@ public abstract class APITest {
 
   private static final ObjectMapper OBJECT_MAPPER;
 
+  @Container
   static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:12-alpine");
 
   static {
@@ -92,6 +93,13 @@ public abstract class APITest {
     return httpHeaders;
   }
 
+  @DynamicPropertySource
+  static void postgresProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.datasource.url", postgreDBContainer::getJdbcUrl);
+    registry.add("spring.datasource.username", postgreDBContainer::getUsername);
+    registry.add("spring.datasource.password", postgreDBContainer::getPassword);
+  }
+
   @TestConfiguration
   static class TestConfig {
 
@@ -99,18 +107,5 @@ public abstract class APITest {
     public DatabaseHelper databaseHelper(JdbcTemplate jdbcTemplate, FolioModuleMetadata moduleMetadata) {
       return new DatabaseHelper(moduleMetadata, jdbcTemplate);
     }
-  }
-
-  static class DockerPostgreDataSourceInitializer implements
-    ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-    @Override
-    public void initialize(ConfigurableApplicationContext applicationContext) {
-      TestPropertySourceUtils.addInlinedPropertiesToEnvironment(applicationContext,
-        "spring.datasource.url=" + postgreDBContainer.getJdbcUrl(),
-        "spring.datasource.username=" + postgreDBContainer.getUsername(),
-        "spring.datasource.password=" + postgreDBContainer.getPassword());
-    }
-
   }
 }
