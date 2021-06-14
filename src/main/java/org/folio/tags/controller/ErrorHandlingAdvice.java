@@ -8,6 +8,7 @@ import static org.folio.tags.util.ErrorsHelper.createUnknownError;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolationException;
 
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.folio.spring.cql.CqlQueryValidationException;
 import org.folio.tenant.domain.dto.Errors;
 
+@Log4j2
 @RestControllerAdvice
 public class ErrorHandlingAdvice {
 
@@ -59,6 +61,7 @@ public class ErrorHandlingAdvice {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ExceptionHandler(Exception.class)
   public Errors handleGlobalException(Exception e) {
+    log.error("Unhandled exception occurred", e);
     return createUnknownError(e.getMessage());
   }
 }
