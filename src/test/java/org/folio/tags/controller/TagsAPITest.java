@@ -2,9 +2,11 @@ package org.folio.tags.controller;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesRegex;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -70,6 +72,8 @@ class TagsAPITest extends APITest {
 
     mockMvc.perform(get("/tags").headers(defaultHeaders()))
       .andExpect(status().isOk())
+      .andExpect(idMatch("$.tags.[0]", not(emptyOrNullString())))
+      .andExpect(idMatch("$.tags.[1]", not(emptyOrNullString())))
       .andExpect(labelMatch("$.tags.[0]", is("important")))
       .andExpect(labelMatch("$.tags.[1]", is("urgent")))
       .andExpect(jsonPath("$.totalRecords").value(2));
@@ -238,15 +242,18 @@ class TagsAPITest extends APITest {
   @Test
   @DisplayName("Return 422 on put tag with duplicate label")
   void return422OnPutWithDuplicateLabel() throws Exception {
-    var label = "Tag";
-    var id = UUID.randomUUID();
-    databaseHelper.saveTag(Tag.builder().id(id).label(label).build(), TENANT);
+    var label1 = "Tag1";
+    var label2 = "Tag2";
+    var id1 = UUID.randomUUID();
+    var id2 = UUID.randomUUID();
+    databaseHelper.saveTag(Tag.builder().id(id1).label(label1).build(), TENANT);
+    databaseHelper.saveTag(Tag.builder().id(id2).label(label2).build(), TENANT);
 
-    var duplicateTag = new TagDto().label(label);
-    mockMvc.perform(putTagById(id, duplicateTag))
+    var duplicateTag = new TagDto().label(label2);
+    mockMvc.perform(putTagById(id1, duplicateTag))
       .andExpect(status().isUnprocessableEntity())
       .andExpect(exceptionMatch(DataIntegrityViolationException.class))
-      .andExpect(errorMessageMatch(containsString("Key (label)=(Tag) already exists")));
+      .andExpect(errorMessageMatch(containsString("Key (label)=(Tag2) already exists")));
   }
 
   @Test

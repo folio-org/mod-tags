@@ -35,6 +35,7 @@ public interface TagsMapper {
 
   List<TagDto> toDtoList(List<Tag> entityList);
 
+  @Mapping(target = "id", ignore = true)
   @Mapping(target = "updatedDate", ignore = true)
   @Mapping(target = "updatedBy", ignore = true)
   @Mapping(target = "createdDate", ignore = true)
