@@ -1,0 +1,245 @@
+openapi: 3.0.0
+info:
+  title: Tags API
+  version: 1.1.0
+paths:
+  /tags:
+    get:
+      description: Retrieve a list of tag items.
+      operationId: getTagCollection
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+            default: cql.allRecords=1
+          required: false
+          description: A query expressed as a CQL string
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+            maximum: 2147483647
+          required: false
+          description: Skip over a number of elements by specifying an offset value for the query
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 1000
+            minimum: 1
+            maximum: 2147483647
+          required: false
+          description: Limit the number of elements returned in the response
+      responses:
+        '200':
+          $ref: '#/components/responses/TagCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          description: Unexpected error
+    post:
+      description: Create a new tag.
+      operationId: postTag
+      requestBody:
+        $ref: '#/components/requestBodies/TagBody'
+      responses:
+        '201':
+          $ref: '#/components/responses/Tag'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          description: Unexpected error
+  /tags/{id}:
+    get:
+      description: Retrieve tag with given ID
+      operationId: getTagById
+      responses:
+        '200':
+          $ref: '#/components/responses/Tag'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          description: Unexpected error
+    put:
+      description: Update tag with given ID
+      operationId: putTagById
+      requestBody:
+        $ref: '#/components/requestBodies/TagBody'
+      responses:
+        '204':
+          description: Tag successfully updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Unexpected error
+    delete:
+      description: Delete tag with given ID
+      operationId: deleteTagById
+      responses:
+        '204':
+          description: Tag deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Unexpected error
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          "$ref": "#/components/schemas/uuid"
+        description: The UUID of a tag
+
+components:
+  requestBodies:
+    TagBody:
+      description: Tag object
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/tagDto'
+          example:
+            label: urgent
+            description: This is urgent stuff
+  responses:
+    Tag:
+      description: Returns a tag
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/tagDto'
+    TagCollection:
+      description: Returns a tag collectiom
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/tagDtoCollection'
+    BadRequest:
+      description: Bad request, e.g. malformed request body or query parameter.
+      content:
+        text/plain:
+          example: malformed parameter 'query', syntax error at column 6
+    Unauthorized:
+      description: Not authorized to perform requested action
+      content:
+        text/plain:
+          example: unable to perform action -- unauthorized
+    NotFound:
+      description: Item with a given ID not found
+      content:
+        text/plain:
+          example: tag not found
+    UnprocessableEntity:
+      description: Validation errors
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errors'
+  schemas:
+    uuid:
+      type: string
+      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+      example: 46669e09-8b45-4ede-afbd-ca73bb89cdb3
+    errors:
+      type: object
+      example:
+        Error:
+          value:
+            errors:
+              - message: may not be null
+                type: 1
+                code: -1
+                parameters:
+                  - key: moduleTo
+                    value: null
+    metadata:
+      type: object
+      title: Metadata
+      description: Metadata about creation and changes to records
+      properties:
+        createdDate:
+          type: string
+          format: date-time
+          description: Date and time when the record was created
+        createdByUserId:
+          $ref: '#/components/schemas/uuid'
+          description: ID of the user who created the record
+        updatedDate:
+          type: string
+          format: date-time
+          description: Date and time when the record was last updated
+        updatedByUserId:
+          $ref: '#/components/schemas/uuid'
+          description: ID of the user who last updated the record
+      required:
+        - createdDate
+    tagDto:
+      type: object
+      title: Tag
+      description: Tag that can be attached to various objects
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+          description: The UUID of this tag
+        label:
+          type: string
+          description: The short label of this tag
+        description:
+          type: string
+          description: The description of this tag
+        metadata:
+          $ref: '#/components/schemas/metadata'
+          readOnly: true
+          description: The metadata of this tag
+      required:
+        - label
+      example:
+        id: 118dbd8c-5ba0-47a9-a850-34bbb1dbf3b7
+        label: important
+        description: This is important stuff.
+    tagDtoCollection:
+      type: object
+      title: Collection of tags
+      description: Tag that can be attached to various objects
+      properties:
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/tagDto'
+        totalRecords:
+          type: integer
+          readOnly: true
+          description: Total amount of tags
+      required:
+        - tags
+      example:
+        tags:
+          - id: 118dbd8c-5ba0-47a9-a850-34bbb1dbf3b7
+            label: important
+            description: This is important stuff.
+          - id: 46669e09-8b45-4ede-afbd-ca73bb89cdb3
+            label: urgent
+            description: This is urgent stuff.
+        totalRecords: 2

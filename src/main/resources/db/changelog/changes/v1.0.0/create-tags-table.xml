@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+
+    <changeSet id="MODTAG-52@@create-pgcrypto-extension" author="psmagin">
+        <sql dbms="postgresql">
+            CREATE EXTENSION IF NOT EXISTS pgcrypto;
+        </sql>
+    </changeSet>
+
+    <changeSet id="MODTAG-52@@create-tags-table-if-not-exist" author="psmagin">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tags"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tags">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_TAGS"/>
+            </column>
+            <column name="label" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="unq_tags_label"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="created_date" type="DATETIME" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="UUID"/>
+            <column name="updated_date" type="DATETIME"/>
+            <column name="updated_by" type="UUID"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="MODTAG-52@@set-default-value-computed-for-id" author="psmagin">
+        <addDefaultValue tableName="tags" columnName="id" defaultValueComputed="gen_random_uuid()"/>
+    </changeSet>
+
+</databaseChangeLog>
