@@ -8,7 +8,7 @@
 
     <changeSet id="MODTAG-52@@create-pgcrypto-extension" author="psmagin">
         <sql dbms="postgresql">
-            CREATE EXTENSION IF NOT EXISTS pgcrypto;
+            CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA public;
         </sql>
     </changeSet>
 
