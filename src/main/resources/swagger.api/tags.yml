@@ -36,8 +36,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/TagCollection'
-        '400':
-          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
@@ -52,8 +50,6 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/Tag'
-        '400':
-          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '422':
@@ -95,8 +91,6 @@ paths:
       responses:
         '204':
           description: Tag deleted successfully
-        '400':
-          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -136,11 +130,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/tagDtoCollection'
-    BadRequest:
-      description: Bad request, e.g. malformed request body or query parameter.
-      content:
-        text/plain:
-          example: malformed parameter 'query', syntax error at column 6
     Unauthorized:
       description: Not authorized to perform requested action
       content:
