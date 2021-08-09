@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -52,7 +53,8 @@ public class ErrorHandlingAdvice {
     MissingServletRequestParameterException.class,
     CqlQueryValidationException.class,
     MethodArgumentTypeMismatchException.class,
-    HttpMessageNotReadableException.class
+    HttpMessageNotReadableException.class,
+    MethodArgumentNotValidException.class
   })
   public Errors handleMissingParameterException(Exception e) {
     return createInternalError(e.getLocalizedMessage(), VALIDATION_ERROR);
