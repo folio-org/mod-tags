@@ -1,3 +1,7 @@
+## 1.0.0 2021-09-xx
+* MODTAG-52 Migrate module to Spring
+* MODTAG-57 Upgrade folio-spring-base to v 2.0.0
+
 ## 0.9.0 2021-06-09
 * MODTAG-48 Add personal data disclosure form
 * MODTAG-53 Upgrade to RMB 33 and Vert.x 4.1.0.CR1
