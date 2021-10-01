@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
 
-    <changeSet id="MODTAG-52@@create-pgcrypto-extension" author="psmagin">
+    <changeSet id="MODTAG-52@@create-pgcrypto-extension" author="psmagin" runOnChange="true">
         <sql dbms="postgresql">
             CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA public;
         </sql>
