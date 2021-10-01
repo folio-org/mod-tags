@@ -1,6 +1,8 @@
-## 1.0.0 2021-09-xx
+## 1.0.0 2021-10-01
 * MODTAG-52 Migrate module to Spring
+* MODTAG-55 Handle exception and change API documentation
 * MODTAG-57 Upgrade folio-spring-base to v 2.0.0
+* MODTAG-58 Fix liquibase error
 
 ## 0.9.0 2021-06-09
 * MODTAG-48 Add personal data disclosure form
