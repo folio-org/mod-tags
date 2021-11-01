@@ -9,4 +9,5 @@
     <include file="changes/v1.0.0/create-tags-table.xml" relativeToChangelogFile="true"/>
     <include file="changes/v1.0.0/migrate-from-jsonb.xml" relativeToChangelogFile="true"/>
     <include file="changes/v1.0.0/create-indexes-and-initial-tags.xml" relativeToChangelogFile="true"/>
+    <include file="changes/v1.0.0/drop-upsert-function.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
