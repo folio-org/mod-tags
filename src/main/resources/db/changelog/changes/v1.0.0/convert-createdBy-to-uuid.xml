@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+  <changeSet id="MODTAG-59@@convert-createdBy-to-uuid" author="Igor-Gorchakov">
+    <preConditions onFail="MARK_RAN">
+      <sqlCheck expectedResult="text">
+        SELECT pg_typeof(created_by) FROM tags limit 1;
+      </sqlCheck>
+    </preConditions>
+    <sql dbms="postgresql">
+      ALTER TABLE tags ALTER COLUMN created_by TYPE uuid USING created_by::uuid;
+    </sql>
+  </changeSet>
+</databaseChangeLog>
