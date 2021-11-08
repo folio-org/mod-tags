@@ -1,3 +1,6 @@
+## 1.0.1 2021-11-08
+* MODTAG-59 Issues observed upgrading from Juniper to Kiwi release
+
 ## 1.0.0 2021-10-01
 * MODTAG-52 Migrate module to Spring
 * MODTAG-55 Handle exception and change API documentation
