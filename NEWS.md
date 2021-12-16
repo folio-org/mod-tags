@@ -1,3 +1,6 @@
+## 1.0.2 2021-12-16
+* MODTAG-62 Log4j vulnerability verification and correction
+
 ## 1.0.1 2021-11-08
 * MODTAG-59 Issues observed upgrading from Juniper to Kiwi release
 
