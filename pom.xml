@@ -26,6 +26,7 @@
 
     <folio-spring-base.version>2.0.0</folio-spring-base.version>
     <mapstruct.version>1.4.2.Final</mapstruct.version>
+    <log4j2.version>2.16.0</log4j2.version>
 
     <!-- Test properties -->
     <testcontainers.version>1.16.0</testcontainers.version>
