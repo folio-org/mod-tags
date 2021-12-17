@@ -1,3 +1,6 @@
+## 0.9.1 2021-12-17
+* MODTAG-64 Log4j vulnerability verification and correction
+
 ## 0.9.0 2021-06-09
 * MODTAG-48 Add personal data disclosure form
 * MODTAG-53 Upgrade to RMB 33 and Vert.x 4.1.0.CR1
