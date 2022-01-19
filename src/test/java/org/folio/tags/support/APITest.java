@@ -74,7 +74,7 @@ public abstract class APITest {
     mockMvc.perform(post("/_/tenant").content(asJsonString(new TenantAttributes().moduleTo("mod-tags")))
       .headers(defaultHeaders())
       .contentType(APPLICATION_JSON))
-      .andExpect(status().isOk());
+      .andExpect(status().isNoContent());
   }
 
   @SneakyThrows
