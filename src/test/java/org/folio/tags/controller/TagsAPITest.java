@@ -22,6 +22,7 @@ import java.util.UUID;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolationException;
 
+import org.folio.tags.util.ErrorsHelper;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -178,7 +179,7 @@ class TagsAPITest extends APITest {
     mockMvc.perform(postTag(duplicateTag))
       .andExpect(status().isUnprocessableEntity())
       .andExpect(exceptionMatch(DataIntegrityViolationException.class))
-      .andExpect(errorMessageMatch(containsString("Key (label)=(Tag) already exists")));
+      .andExpect(errorTypeMatch(ErrorsHelper.ErrorType.INTERNAL.getTypeCode()));
   }
 
   // Tests for GET /tags/{id}
@@ -253,7 +254,7 @@ class TagsAPITest extends APITest {
     mockMvc.perform(putTagById(id1, duplicateTag))
       .andExpect(status().isUnprocessableEntity())
       .andExpect(exceptionMatch(DataIntegrityViolationException.class))
-      .andExpect(errorMessageMatch(containsString("Key (label)=(Tag2) already exists")));
+      .andExpect(errorTypeMatch(ErrorsHelper.ErrorType.INTERNAL.getTypeCode()));
   }
 
   @Test
@@ -316,6 +317,10 @@ class TagsAPITest extends APITest {
 
   private ResultMatcher errorMessageMatch(Matcher<String> errorMessageMatcher) {
     return jsonPath("$.errors.[0].message", errorMessageMatcher);
+  }
+
+  private ResultMatcher errorTypeMatch(String value) {
+    return jsonPath("$.errors.[0].type").value(value);
   }
 
   private ResultMatcher labelMatch(String prefix, Matcher<String> labelMatcher) {
