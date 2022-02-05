@@ -2,7 +2,7 @@
   "srvcId": "@artifactId@-@version@",
   "nodeId": "localhost",
   "descriptor": {
-    "exec": "java -Dport=%p -jar ../mod-tags/target/mod-tags-fat.jar -Dhttp.port=%p"
+    "exec": "java -Dserver.port=%p -jar ../mod-tags/target/@artifactId@-@version@.jar"
   }
 }
 
