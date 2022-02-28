@@ -1,3 +1,7 @@
+## 1.1.0 2022-02-23
+* MODTAG-66 Update folio-spring-base to v3.0
+* MODTAG-70 Improve pom.xml
+
 ## 1.0.1 2021-11-08
 * MODTAG-59 Issues observed upgrading from Juniper to Kiwi release
 
