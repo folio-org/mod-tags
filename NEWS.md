@@ -1,3 +1,6 @@
+## 1.1.1 2022-04-06
+* MODTAG-76 Add preConditions to cleanup RMB fucntions
+
 ## 1.1.0 2022-02-23
 * MODTAG-66 Update folio-spring-base to v3.0
 * MODTAG-70 Improve pom.xml
