@@ -12,7 +12,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="MODTAG-52@@populate-initial-tags" author="psmagin" failOnError="false" runOnChange="false">
+    <changeSet id="MODTAG-52@@populate-initial-tags" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT count(label) FROM tags WHERE label = 'important';
@@ -23,7 +23,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="MODTAG-52@@populate-initial-tag-urgent" author="Igor-Gorchakov">
+    <changeSet id="MODTAG-52@@populate-initial-tag-urgent" author="Igor-Gorchakov" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT count(label) FROM tags WHERE label = 'urgent';
