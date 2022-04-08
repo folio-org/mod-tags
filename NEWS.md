@@ -1,3 +1,6 @@
+## 1.1.2 2022-04-08
+* MODTAG-79 Fix delete tenant not supported
+
 ## 1.1.1 2022-04-06
 * MODTAG-76 Add preConditions to cleanup RMB fucntions
 
