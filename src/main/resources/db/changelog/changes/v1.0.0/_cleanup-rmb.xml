@@ -7,7 +7,7 @@
 
     <changeSet id="MODTAG-52@@create-isfunctionexist-with-argcount-function" author="psmagin" runOnChange="true">
         <sql splitStatements="false">
-            CREATE OR REPLACE FUNCTION ISFUNCTIONEXIST(FUNCTIONNAME text, ARGCOUNT int)
+            CREATE OR REPLACE FUNCTION ${database.defaultSchemaName}.ISFUNCTIONEXIST(FUNCTIONNAME text, ARGCOUNT int)
             RETURNS boolean AS
             $BODY$
              BEGIN
@@ -25,7 +25,7 @@
 
     <changeSet id="MODTAG-52@@create-isfunctionexist-function" author="psmagin" runOnChange="true">
         <sql splitStatements="false">
-            CREATE OR REPLACE FUNCTION ISFUNCTIONEXIST(FUNCTIONNAME text)
+            CREATE OR REPLACE FUNCTION ${database.defaultSchemaName}.ISFUNCTIONEXIST(FUNCTIONNAME text)
             RETURNS boolean AS
             $BODY$
              BEGIN
@@ -41,220 +41,220 @@
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-rmb-job-table" author="psmagin" runOnChange="true">
-        <sql dbms="postgresql">DROP TABLE IF EXISTS rmb_job</sql>
+        <sql dbms="postgresql">DROP TABLE IF EXISTS ${database.defaultSchemaName}.rmb_job</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-rmb-internal-table" author="psmagin" runOnChange="true">
-        <sql dbms="postgresql">DROP TABLE IF EXISTS rmb_internal</sql>
+        <sql dbms="postgresql">DROP TABLE IF EXISTS ${database.defaultSchemaName}.rmb_internal</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-rmb-internal-analyze-table" author="psmagin" runOnChange="true">
-        <sql dbms="postgresql">DROP TABLE IF EXISTS rmb_internal_analyze</sql>
+        <sql dbms="postgresql">DROP TABLE IF EXISTS ${database.defaultSchemaName}.rmb_internal_analyze</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-rmb-internal-index-table" author="psmagin" runOnChange="true">
-        <sql dbms="postgresql">DROP TABLE IF EXISTS rmb_internal_index</sql>
+        <sql dbms="postgresql">DROP TABLE IF EXISTS ${database.defaultSchemaName}.rmb_internal_index</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-tags_label_idx_unique-index" author="psmagin" runOnChange="true">
-        <sql dbms="postgresql">DROP INDEX IF EXISTS tags_label_idx_unique</sql>
+        <sql dbms="postgresql">DROP INDEX IF EXISTS ${database.defaultSchemaName}.tags_label_idx_unique</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-count_estimate_smart2-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('count_estimate_smart2');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('count_estimate_smart2');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS count_estimate_smart2</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.count_estimate_smart2</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-first_array_object_value-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('first_array_object_value');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('first_array_object_value');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS first_array_object_value</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.first_array_object_value</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-normalize_digits-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('normalize_digits');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('normalize_digits');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS normalize_digits</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.normalize_digits</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-count_estimate-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('count_estimate');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('count_estimate');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS count_estimate</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.count_estimate</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-concat_array_object-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('concat_array_object');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('concat_array_object');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS concat_array_object</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.concat_array_object</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-concat_array_object_values2-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('concat_array_object_values', 2);
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('concat_array_object_values', 2);
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS concat_array_object_values (in jsonb_array jsonb, in field text)</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.concat_array_object_values (in jsonb_array jsonb, in field text)</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-concat_array_object_values4-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('concat_array_object_values', 4);
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('concat_array_object_values', 4);
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS concat_array_object_values (in jsonb_array jsonb, in field text, in filterkey text, in filtervalue text)</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.concat_array_object_values (in jsonb_array jsonb, in field text, in filterkey text, in filtervalue text)</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-tsquery_or-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('tsquery_or', 1);
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('tsquery_or', 1);
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS tsquery_or (in text)</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.tsquery_or (in text)</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-uuid_smaller-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('uuid_smaller');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('uuid_smaller');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS uuid_smaller CASCADE</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.uuid_smaller CASCADE</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-count_estimate_default-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('count_estimate_default');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('count_estimate_default');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS count_estimate_default</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.count_estimate_default</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-next_uuid-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('next_uuid');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('next_uuid');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS next_uuid</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.next_uuid</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-uuid_larger-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('uuid_larger');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('uuid_larger');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS uuid_larger CASCADE</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.uuid_larger CASCADE</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-tsquery_phrase-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('tsquery_phrase', 1);
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('tsquery_phrase', 1);
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS tsquery_phrase (in text)</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.tsquery_phrase (in text)</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-get_tsvector-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('get_tsvector');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('get_tsvector');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS get_tsvector</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.get_tsvector</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-rmb_internal_index-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('rmb_internal_index');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('rmb_internal_index');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS rmb_internal_index</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.rmb_internal_index</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-tsquery_and-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('tsquery_and', 1);
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('tsquery_and', 1);
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS tsquery_and (in text)</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.tsquery_and (in text)</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-concat_space_sql-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('concat_space_sql');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('concat_space_sql');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS concat_space_sql</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.concat_space_sql</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-set_id_in_jsonb-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('set_id_in_jsonb');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('set_id_in_jsonb');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS set_id_in_jsonb CASCADE</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.set_id_in_jsonb CASCADE</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-tags_set_md-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('tags_set_md');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('tags_set_md');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS tags_set_md CASCADE</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.tags_set_md CASCADE</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-set_tags_md_json-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('set_tags_md_json');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('set_tags_md_json');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS set_tags_md_json CASCADE</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.set_tags_md_json CASCADE</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-f_unaccent-function" author="psmagin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="t">
-                SELECT ISFUNCTIONEXIST('f_unaccent');
+                SELECT ${database.defaultSchemaName}.ISFUNCTIONEXIST('f_unaccent');
             </sqlCheck>
         </preConditions>
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS f_unaccent</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.f_unaccent</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-isfunctionexist-function" author="psmagin">
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ISFUNCTIONEXIST(TEXT)</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.ISFUNCTIONEXIST(TEXT)</sql>
     </changeSet>
 
     <changeSet id="MODTAG-52@@drop-isfunctionexist-with-argcount-function" author="psmagin">
-        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ISFUNCTIONEXIST(TEXT, INT)</sql>
+        <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.ISFUNCTIONEXIST(TEXT, INT)</sql>
     </changeSet>
-    
+
 </databaseChangeLog>
