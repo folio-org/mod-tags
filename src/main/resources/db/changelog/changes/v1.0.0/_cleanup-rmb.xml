@@ -249,11 +249,11 @@
         <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.f_unaccent</sql>
     </changeSet>
 
-    <changeSet id="MODTAG-52@@drop-isfunctionexist-function" author="psmagin">
+    <changeSet id="MODTAG-52@@drop-isfunctionexist-function" author="psmagin" runOnChange="true">
         <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.ISFUNCTIONEXIST(TEXT)</sql>
     </changeSet>
 
-    <changeSet id="MODTAG-52@@drop-isfunctionexist-with-argcount-function" author="psmagin">
+    <changeSet id="MODTAG-52@@drop-isfunctionexist-with-argcount-function" author="psmagin" runOnChange="true">
         <sql dbms="postgresql">DROP FUNCTION IF EXISTS ${database.defaultSchemaName}.ISFUNCTIONEXIST(TEXT, INT)</sql>
     </changeSet>
 
