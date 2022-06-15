@@ -1,3 +1,6 @@
+## 1.2.0-SNAPSHOT 2022-xx-xx
+* MODTAG-66 Update folio-spring-base to v4.1.0
+
 ## 1.1.0 2022-02-23
 * MODTAG-66 Update folio-spring-base to v3.0
 * MODTAG-70 Improve pom.xml
