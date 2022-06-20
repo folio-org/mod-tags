@@ -27,6 +27,10 @@ folio:
   tenant:
     validation:
       enabled: true
+  logging:
+    request:
+      enabled: true
+      level: basic
 management:
   endpoints:
     web:
