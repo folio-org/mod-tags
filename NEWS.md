@@ -1,5 +1,7 @@
-## 1.2.0-SNAPSHOT 2022-xx-xx
+## 1.2.0 2022-06-27
 * MODTAG-85 Update folio-spring-base to v4.1.0
+* MODTAG-79 Support tenant deletion
+* MODTAG-76 Fix migration scripts
 
 ## 1.1.0 2022-02-23
 * MODTAG-66 Update folio-spring-base to v3.0
