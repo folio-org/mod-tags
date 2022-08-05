@@ -1,17 +1,14 @@
 package org.folio.tags.service;
 
 import java.util.UUID;
-
 import javax.persistence.EntityNotFoundException;
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import org.folio.spring.data.OffsetRequest;
 import org.folio.tags.dao.repository.TagRepository;
 import org.folio.tags.domain.dto.TagDto;
 import org.folio.tags.domain.dto.TagDtoCollection;
 import org.folio.tags.mapper.TagsMapper;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

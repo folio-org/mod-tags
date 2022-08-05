@@ -1,7 +1,6 @@
 package org.folio.tags.service;
 
 import java.util.UUID;
-
 import org.folio.tags.domain.dto.TagDto;
 import org.folio.tags.domain.dto.TagDtoCollection;
 

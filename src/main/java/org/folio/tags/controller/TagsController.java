@@ -2,15 +2,13 @@ package org.folio.tags.controller;
 
 import java.net.URI;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
 import org.folio.tags.domain.dto.TagDto;
 import org.folio.tags.domain.dto.TagDtoCollection;
 import org.folio.tags.rest.resource.TagsApi;
 import org.folio.tags.service.TagService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor

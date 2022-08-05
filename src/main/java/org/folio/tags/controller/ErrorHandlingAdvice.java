@@ -7,9 +7,10 @@ import static org.folio.tags.util.ErrorsHelper.createUnknownError;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolationException;
-
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.spring.cql.CqlQueryValidationException;
+import org.folio.tenant.domain.dto.Errors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -19,9 +20,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
-import org.folio.spring.cql.CqlQueryValidationException;
-import org.folio.tenant.domain.dto.Errors;
 
 @Log4j2
 @RestControllerAdvice
