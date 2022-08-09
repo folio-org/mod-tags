@@ -5,19 +5,17 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
-
 import org.apache.commons.lang3.StringUtils;
+import org.folio.tags.dao.model.Tag;
+import org.folio.tags.domain.dto.Metadata;
+import org.folio.tags.domain.dto.TagDto;
+import org.folio.tags.domain.dto.TagDtoCollection;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValueCheckStrategy;
 import org.springframework.data.domain.Page;
-
-import org.folio.tags.dao.model.Tag;
-import org.folio.tags.domain.dto.Metadata;
-import org.folio.tags.domain.dto.TagDto;
-import org.folio.tags.domain.dto.TagDtoCollection;
 
 @Mapper(componentModel = "spring", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
 public interface TagsMapper {

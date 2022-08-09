@@ -18,10 +18,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import java.util.UUID;
-
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolationException;
-
+import org.folio.spring.cql.CqlQueryValidationException;
+import org.folio.tags.dao.model.Tag;
+import org.folio.tags.domain.dto.TagDto;
+import org.folio.tags.support.ApiTest;
 import org.folio.tags.util.ErrorsHelper;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,12 +34,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-import org.folio.spring.cql.CqlQueryValidationException;
-import org.folio.tags.dao.model.Tag;
-import org.folio.tags.domain.dto.TagDto;
-import org.folio.tags.support.APITest;
+class TagsApiTest extends ApiTest {
 
-class TagsAPITest extends APITest {
+  private static final String TAGS_LOCATION_PATTERN =
+    "^/tags/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$";
 
   @BeforeEach
   void setUp() {
@@ -94,7 +94,7 @@ class TagsAPITest extends APITest {
     var limit = "1";
     var offset = "1";
     mockMvc.perform(get("/tags?limit={l}&offset={o}&query={cql}", limit, offset, cqlQuery)
-      .headers(defaultHeaders()))
+        .headers(defaultHeaders()))
       .andExpect(status().isOk())
       .andExpect(labelMatch("$.tags.[0]", is("important")))
       .andExpect(jsonPath("$.tags.[1]").doesNotExist())
@@ -113,7 +113,7 @@ class TagsAPITest extends APITest {
 
     var cqlQuery = "label=asap";
     mockMvc.perform(get("/tags?query={cql}", cqlQuery)
-      .headers(defaultHeaders()))
+        .headers(defaultHeaders()))
       .andExpect(status().isOk())
       .andExpect(labelMatch("$.tags.[0]", is("asap")))
       .andExpect(jsonPath("$.tags.[1]").doesNotExist())
@@ -125,7 +125,7 @@ class TagsAPITest extends APITest {
   void return422OnGetCollectionWithInvalidCqlQuery() throws Exception {
     var cqlQuery = "!invalid-cql!";
     mockMvc.perform(get("/tags?query={cql}", cqlQuery)
-      .headers(defaultHeaders()))
+        .headers(defaultHeaders()))
       .andExpect(status().isUnprocessableEntity())
       .andExpect(exceptionMatch(CqlQueryValidationException.class))
       .andExpect(errorMessageMatch(containsString("Not implemented yet node type")));
@@ -135,7 +135,7 @@ class TagsAPITest extends APITest {
   @DisplayName("Return 422 on get collection with invalid offset")
   void return422OnGetCollectionWithInvalidOffset() throws Exception {
     mockMvc.perform(get("/tags?offset={offset}", -1)
-      .headers(defaultHeaders()))
+        .headers(defaultHeaders()))
       .andExpect(status().isUnprocessableEntity())
       .andExpect(exceptionMatch(ConstraintViolationException.class))
       .andExpect(errorMessageMatch(containsString("must be greater than or equal to 0")));
@@ -145,7 +145,7 @@ class TagsAPITest extends APITest {
   @DisplayName("Return 422 on get collection with invalid limit")
   void return422OnGetCollectionWithInvalidLimit() throws Exception {
     mockMvc.perform(get("/tags?limit={limit}", -1)
-      .headers(defaultHeaders()))
+        .headers(defaultHeaders()))
       .andExpect(status().isUnprocessableEntity())
       .andExpect(exceptionMatch(ConstraintViolationException.class))
       .andExpect(errorMessageMatch(containsString("must be greater than or equal to 1")));
@@ -161,8 +161,7 @@ class TagsAPITest extends APITest {
     var tag = new TagDto().label(label).description(description);
     mockMvc.perform(postTag(tag))
       .andExpect(status().isCreated())
-      .andExpect(header().string(HttpHeaders.LOCATION,
-        matchesRegex("^/tags/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$")))
+      .andExpect(header().string(HttpHeaders.LOCATION, matchesRegex(TAGS_LOCATION_PATTERN)))
       .andExpect(labelMatch("$", is(label)))
       .andExpect(descriptionMatch("$", is(description)))
       .andExpect(jsonPath("$.metadata.createdByUserId").value(USER_ID))

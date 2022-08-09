@@ -1,7 +1,6 @@
 package org.folio.tags.dao.repository;
 
 import java.util.UUID;
-
 import org.folio.spring.cql.JpaCqlRepository;
 import org.folio.tags.dao.model.Tag;
 

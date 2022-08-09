@@ -2,12 +2,10 @@ package org.folio.tags.support;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.jdbc.JdbcTestUtils;
-
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.tags.dao.model.Tag;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.jdbc.JdbcTestUtils;
 
 public class DatabaseHelper {
 

@@ -8,6 +8,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.integration.XOkapiHeaders;
+import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,23 +29,16 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import org.folio.spring.FolioModuleMetadata;
-import org.folio.spring.integration.XOkapiHeaders;
-import org.folio.tenant.domain.dto.TenantAttributes;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration
 @AutoConfigureMockMvc
 @Testcontainers
 @DirtiesContext
-public abstract class APITest {
+public abstract class ApiTest {
 
-  protected static final String TOKEN =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5MywidGVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
   protected static final String TENANT = "test";
+  protected static final String TOKEN = "test-jwt-token";
   protected static final String USER_ID = "77777777-7777-7777-7777-777777777777";
-
-  private static final ObjectMapper OBJECT_MAPPER;
 
   @Container
   static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>("postgres:12-alpine");
@@ -53,6 +49,8 @@ public abstract class APITest {
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
       .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
   }
+
+  private static final ObjectMapper OBJECT_MAPPER;
 
   @Autowired
   protected MockMvc mockMvc;
@@ -72,8 +70,8 @@ public abstract class APITest {
   @SneakyThrows
   protected static void setUpTenant(MockMvc mockMvc) {
     mockMvc.perform(post("/_/tenant").content(asJsonString(new TenantAttributes().moduleTo("mod-tags")))
-      .headers(defaultHeaders())
-      .contentType(APPLICATION_JSON))
+        .headers(defaultHeaders())
+        .contentType(APPLICATION_JSON))
       .andExpect(status().isNoContent());
   }
 
