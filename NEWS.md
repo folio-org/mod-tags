@@ -1,3 +1,8 @@
+## 1.3.0 xxxx-xx-xx
+* FOLIO-3527 Update PR template
+* MODTAG-94 Add checkstyle maven plugin
+* MODTAG-95 Update folio-spring-base to v5.0.0
+
 ## 1.2.0 2022-06-27
 * MODTAG-85 Update folio-spring-base to v4.1.0
 * MODTAG-79 Support tenant deletion
