@@ -9,3 +9,4 @@
 | R3 2021          | Kiwi            | v1.0               |
 | R1 2022          | Lotus           | v1.1               |
 | R2 2022          | Morning Glory   | v1.2               |
+| R3 2022          | Nolana          | v1.3               |
