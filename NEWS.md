@@ -1,4 +1,4 @@
-## 1.3.0 xxxx-xx-xx
+## 1.3.0 2022-10-19
 * FOLIO-3527 Update PR template
 * MODTAG-94 Add checkstyle maven plugin
 * MODTAG-95 Update folio-spring-base to v5.0.0
