@@ -16,10 +16,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.UUID;
-import javax.persistence.EntityNotFoundException;
-import javax.validation.ConstraintViolationException;
 import org.folio.spring.cql.CqlQueryValidationException;
 import org.folio.tags.dao.model.Tag;
 import org.folio.tags.domain.dto.TagDto;
