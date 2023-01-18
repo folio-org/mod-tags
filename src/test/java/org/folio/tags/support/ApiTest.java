@@ -32,7 +32,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@EnableAutoConfiguration(exclude = {FlywayAutoConfiguration.class})
+@EnableAutoConfiguration
 @ContextConfiguration
 @AutoConfigureMockMvc
 @Testcontainers
