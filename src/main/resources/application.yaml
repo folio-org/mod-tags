@@ -22,6 +22,10 @@ spring:
     exclude: org.springframework.boot.autoconfigure.mustache.MustacheAutoConfiguration
   jackson:
     default-property-inclusion: NON_EMPTY
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
 folio:
   tenant:
     validation:
