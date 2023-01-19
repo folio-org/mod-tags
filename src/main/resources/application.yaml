@@ -1,17 +1,11 @@
 spring:
   application:
     name: mod-tags
-  datasource:
-    spring:
-      sql:
-        init:
-          continue-on-error: true
     password: ${DB_PASSWORD:folio_admin}
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:okapi_modules}
     username: ${DB_USERNAME:folio_admin}
   jpa:
     open-in-view: true
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
     properties:
