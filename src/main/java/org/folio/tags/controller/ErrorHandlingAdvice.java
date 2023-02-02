@@ -5,8 +5,8 @@ import static org.folio.tags.util.ErrorsHelper.ErrorCode.VALIDATION_ERROR;
 import static org.folio.tags.util.ErrorsHelper.createInternalError;
 import static org.folio.tags.util.ErrorsHelper.createUnknownError;
 
-import javax.persistence.EntityNotFoundException;
-import javax.validation.ConstraintViolationException;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.spring.cql.CqlQueryValidationException;

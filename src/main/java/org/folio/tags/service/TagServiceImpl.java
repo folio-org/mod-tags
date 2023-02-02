@@ -1,7 +1,7 @@
 package org.folio.tags.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.UUID;
-import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.folio.spring.data.OffsetRequest;
 import org.folio.tags.dao.repository.TagRepository;

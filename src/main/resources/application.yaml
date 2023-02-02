@@ -8,12 +8,11 @@ spring:
     username: ${DB_USERNAME:folio_admin}
   jpa:
     open-in-view: true
-    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: false
   liquibase:
@@ -23,6 +22,10 @@ spring:
     exclude: org.springframework.boot.autoconfigure.mustache.MustacheAutoConfiguration
   jackson:
     default-property-inclusion: NON_EMPTY
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
 folio:
   tenant:
     validation:
