@@ -24,7 +24,8 @@ public class TagServiceImpl implements TagService {
 
   @Override
   public TagDtoCollection fetchTagCollection(String query, Integer offset, Integer limit) {
-    log.debug("fetchTagCollection:: trying to fetch tag collection by query: {}, offset: {}, limit: {}", query, offset, limit);
+    log.debug("fetchTagCollection:: trying to fetch tag collection by query: {}, offset: {}, limit: {}",
+             query, offset, limit);
     Page<Tag> tagPage = repository.findByCQL(query, OffsetRequest.of(offset, limit));
     log.info("fetchTagCollection:: loaded tags: {}", tagPage.getNumberOfElements());
     return mapper.toDtoCollection(tagPage);
@@ -42,9 +43,7 @@ public class TagServiceImpl implements TagService {
   public TagDto fetchTagById(UUID id) {
     log.debug("fetchTagById:: trying to fetch a tag with id: {}", id);
     Optional<Tag> byId = repository.findById(id);
-    byId.ifPresent((b) -> {
-      log.info("fetchTagById:: loaded tag with id: {}", b.getId());
-    });
+    byId.ifPresent(b -> log.info("fetchTagById:: loaded tag with id: {}", b.getId()));
     return byId
       .map(mapper::toDto)
       .orElseThrow(() -> notFound(id));
@@ -62,8 +61,8 @@ public class TagServiceImpl implements TagService {
   public void removeTagById(UUID id) {
     log.debug("removeTagById:: trying to remove a tag with id: {}", id);
     repository.findById(id)
-      .ifPresentOrElse((i) -> {
-        repository.delete(i);
+      .ifPresentOrElse(tag -> {
+        repository.delete(tag);
         log.debug("removeTagById:: removed a tag with id: {}", id);
       }, throwNotFoundById(id));
   }
