@@ -23,6 +23,7 @@
     <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
     <folio-spring-base.version>6.0.1</folio-spring-base.version>
     <mapstruct.version>1.5.3.Final</mapstruct.version>
 
