@@ -1,3 +1,18 @@
+## v2.0.0 2023-02-15
+### Breaking changes
+* Migration to Spring Boot v3.0.0 and Java 17 ([MODTAG-101](https://issues.folio.org/browse/MODTAG-101))
+
+### Tech Dept
+* Align logging configuration with common Folio solution ([MODTAG-100](https://issues.folio.org/browse/MODTAG-100))
+* Improve logging according common Folio solution ([MODTAG-73](https://issues.folio.org/browse/MODTAG-73))
+
+### Dependencies
+* Bump `java` from `11` to `17`
+* Bump `spring-boot-starter-parent` from `2.7.4` to `3.0.2`
+* Bump `folio-spring-base` from `5.0.1` to `6.0.1`
+* Bump `mapstruct` from `1.5.2.Final` to `1.5.3.Final`
+* Bump `testcontainers` from `1.17.4` to `1.17.6`
+
 ## 1.3.0 2022-10-19
 * FOLIO-3527 Update PR template
 * MODTAG-94 Add checkstyle maven plugin
