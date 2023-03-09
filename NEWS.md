@@ -1,3 +1,10 @@
+## v2.0.1 2023-03-09
+### Tech Dept
+* OpenSSL 3.0.8 fixing 8 vulnerabilities ([MODTAG-106](https://issues.folio.org/browse/MODTAG-106))
+
+### Dependencies
+* Bump `folio-spring-base` from `6.0.1` to `6.0.2`
+
 ## v2.0.0 2023-02-15
 ### Breaking changes
 * Migration to Spring Boot v3.0.0 and Java 17 ([MODTAG-101](https://issues.folio.org/browse/MODTAG-101))
