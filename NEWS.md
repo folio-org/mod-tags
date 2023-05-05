@@ -1,3 +1,11 @@
+## v2.1.0 in progress
+### Dependencies
+* Bump `folio-spring-base` from `6.0.2` to `7.0.0`
+* Add  `folio-spring-cql` with groupId `org.folio` & version `7.0.0`
+
+### Tech Dept
+* Migrate to folio-spring-support v7.0.0 ([MODTAG-113](https://issues.folio.org/browse/MODTAG-113))
+
 ## v2.0.1 2023-03-09
 ### Tech Dept
 * OpenSSL 3.0.8 fixing 8 vulnerabilities ([MODTAG-106](https://issues.folio.org/browse/MODTAG-106))
