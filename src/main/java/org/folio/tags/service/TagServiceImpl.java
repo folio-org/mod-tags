@@ -26,7 +26,7 @@ public class TagServiceImpl implements TagService {
   public TagDtoCollection fetchTagCollection(String query, Integer offset, Integer limit) {
     log.debug("fetchTagCollection:: trying to fetch tag collection by query: {}, offset: {}, limit: {}",
              query, offset, limit);
-    Page<Tag> tagPage = repository.findByCQL(query, OffsetRequest.of(offset, limit));
+    Page<Tag> tagPage = repository.findByCql(query, OffsetRequest.of(offset, limit));
     log.info("fetchTagCollection:: loaded tags: {}", tagPage.getNumberOfElements());
     return mapper.toDtoCollection(tagPage);
   }
