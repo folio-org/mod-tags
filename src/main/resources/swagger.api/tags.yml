@@ -72,7 +72,7 @@ paths:
         '500':
           description: Unexpected error
     put:
-      description: Update tag with given ID
+      description: Update tag with given ID. When renaming the tag label mod-tags doesn't update it in other modules, the client must ensure this.
       operationId: putTagById
       requestBody:
         $ref: '#/components/requestBodies/TagBody'
@@ -86,7 +86,7 @@ paths:
         '500':
           description: Unexpected error
     delete:
-      description: Delete tag with given ID
+      description: Delete tag with given ID. This neither checks whether other modules still use the tag label nor does it delete the tag from other modules. The client must ensure this.
       operationId: deleteTagById
       responses:
         '204':
