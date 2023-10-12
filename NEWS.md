@@ -1,10 +1,17 @@
-## v2.1.0 in progress
-### Dependencies
-* Bump `folio-spring-base` from `6.0.2` to `7.0.0`
-* Add  `folio-spring-cql` with groupId `org.folio` & version `7.0.0`
-
+## v2.1.0
 ### Tech Dept
-* Migrate to folio-spring-support v7.0.0 ([MODTAG-113](https://issues.folio.org/browse/MODTAG-113))
+* Upgrade Folio spring dependency version ([MODTAG-120](https://issues.folio.org/browse/MODTAG-120))
+* Upgrade Folio spring base dependency version ([MODTAG-119](https://issues.folio.org/browse/MODTAG-119))
+* Explain missing referential integrity for PUT and DELETE ([MODTAG-117](https://issues.folio.org/browse/MODTAG-117))
+* Update copyright year ([FOLIO-1021](https://issues.folio.org/browse/FOLIO-1021))
+* Use GitHub Workflows api-lint, api-schema-lint and api-doc ([FOLIO-3678](https://issues.folio.org/browse/FOLIO-3678))
+* Migrate to folio-spring-support ([MODTAG-113](https://issues.folio.org/browse/MODTAG-113))
+* Can't find tag with special character using GET endpoint "/tags" ([MODTAG-105](https://issues.folio.org/browse/MODTAG-105))
+
+### Dependencies
+* Bump `folio-spring-base` to `7.2.0`
+* Bump `spring-boot-starter-parent` to `3.1.4`
+* Add `folio-spring-cql` `7.2.0`
 
 ## v2.0.1 2023-03-09
 ### Tech Dept
