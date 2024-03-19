@@ -1,3 +1,6 @@
+## v2.2.0 2024-03-19
+* Upgrade Folio spring dependency version ([MODTAG-121](https://issues.folio.org/browse/MODTAG-121))
+
 ## v2.1.0
 ### Tech Dept
 * Upgrade Folio spring dependency version ([MODTAG-120](https://issues.folio.org/browse/MODTAG-120))
