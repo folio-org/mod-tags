@@ -4,11 +4,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Objects;
 import lombok.SneakyThrows;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.integration.XOkapiHeaders;
@@ -45,7 +44,8 @@ public abstract class ApiTest {
   protected static final String USER_ID = "77777777-7777-7777-7777-777777777777";
 
   @Container
-  static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>(Objects  .toString(System.getenv("TESTCONTAINERS_POSTGRES_IMAGE"), "postgres:16-alpine"));
+  static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>(
+    Objects.toString(System.getenv("TESTCONTAINERS_POSTGRES_IMAGE"), "postgres:16-alpine"));
 
   static {
     postgreDBContainer.start();
