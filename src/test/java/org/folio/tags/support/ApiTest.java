@@ -45,7 +45,7 @@ public abstract class ApiTest {
   protected static final String USER_ID = "77777777-7777-7777-7777-777777777777";
 
   @Container
-  static PostgreSQLContainer<?> postgreDBContainer = Objects.toString(System.getenv("TESTCONTAINERS_POSTGRES_IMAGE"), "postgres:16-alpine"))
+  static PostgreSQLContainer<?> postgreDBContainer = new PostgreSQLContainer<>(Objects  .toString(System.getenv("TESTCONTAINERS_POSTGRES_IMAGE"), "postgres:16-alpine"));
 
   static {
     postgreDBContainer.start();
