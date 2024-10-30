@@ -1,3 +1,8 @@
+## v2.3.0 2024-10-30
+* Upgrade folio spring support version ([MODTAG-126](https://issues.folio.org/browse/MODTAG-126))
+* Upgrade versions for Ramsons release ([MODTAG-127](https://issues.folio.org/browse/MODTAG-127))
+
+
 ## v2.2.0 2024-03-19
 * Upgrade Folio spring dependency version ([MODTAG-121](https://issues.folio.org/browse/MODTAG-121))
 
