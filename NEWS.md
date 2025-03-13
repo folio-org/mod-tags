@@ -1,3 +1,6 @@
+## v2.4.0 2025-03-13
+* Update to mod-tags Java 21 (Java, spring upgrades) ([FOLIO-4221](https://folio-org.atlassian.net/browse/FOLIO-4221))
+
 ## v2.3.0 2024-10-30
 * Upgrade folio spring support version ([MODTAG-126](https://issues.folio.org/browse/MODTAG-126))
 * Upgrade versions for Ramsons release ([MODTAG-127](https://issues.folio.org/browse/MODTAG-127))
