@@ -24,7 +24,8 @@ public interface TagsMapper {
   TagDto toDto(Tag entity);
 
   @InheritInverseConfiguration
-  Tag toEntity(TagDto dto);
+  @Mapping(target = "id", ignore = true)
+  Tag toNewEntity(TagDto dto);
 
   default TagDtoCollection toDtoCollection(Page<Tag> entityList) {
     return new TagDtoCollection().tags(toDtoList(entityList.getContent())).totalRecords(
