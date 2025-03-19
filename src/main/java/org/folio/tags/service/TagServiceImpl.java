@@ -34,7 +34,7 @@ public class TagServiceImpl implements TagService {
   @Override
   public TagDto createTag(TagDto tag) {
     log.debug("createTag:: trying to create a tag with: {}", tag);
-    Tag saved = repository.save(mapper.toEntity(tag));
+    Tag saved = repository.save(mapper.toNewEntity(tag));
     log.info("createTag:: created a tag: {}", saved);
     return mapper.toDto(saved);
   }

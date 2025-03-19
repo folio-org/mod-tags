@@ -158,12 +158,13 @@ class TagsApiTest extends ApiTest {
   void createNewTag() throws Exception {
     var label = "First tag";
     var description = "This is the first test tag";
-    var tag = new TagDto().label(label).description(description);
+    var tag = new TagDto().label(label).description(description).id(UUID.randomUUID().toString());
     mockMvc.perform(postTag(tag))
       .andExpect(status().isCreated())
       .andExpect(header().string(HttpHeaders.LOCATION, matchesRegex(TAGS_LOCATION_PATTERN)))
       .andExpect(labelMatch("$", is(label)))
       .andExpect(descriptionMatch("$", is(description)))
+      .andExpect(jsonPath("$.id").isNotEmpty())
       .andExpect(jsonPath("$.metadata.createdByUserId").value(USER_ID))
       .andExpect(jsonPath("$.metadata.createdDate").isNotEmpty());
   }
