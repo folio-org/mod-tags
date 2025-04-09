@@ -1,3 +1,6 @@
+## v2.4.1 2025-04-09
+* The 'Cannot create new tag: you may not have the required permissions.' message is displayed after creating new tag ([MODTAG-133](https://folio-org.atlassian.net/browse/MODTAG-133))
+
 ## v2.4.0 2025-03-13
 * Update to mod-tags Java 21 (Java, spring upgrades) ([FOLIO-4221](https://folio-org.atlassian.net/browse/FOLIO-4221))
 
