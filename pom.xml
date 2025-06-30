@@ -27,7 +27,7 @@
     <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- Test properties -->
-    <testcontainers.version>1.20.6</testcontainers.version>
+    <testcontainers.version>1.21.3</testcontainers.version>
 
     <!-- Plugin properties-->
     <openapi.input.file>${project.basedir}/src/main/resources/swagger.api/tags.yml</openapi.input.file>
