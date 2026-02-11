@@ -1,3 +1,6 @@
+## 2.5.0 In Progress
+* Use GitHub Workflows for Maven ([MODTAG-143](https://folio-org.atlassian.net/browse/MODTAG-143))
+
 ## v2.4.0 2025-03-13
 * Update to mod-tags Java 21 (Java, spring upgrades) ([FOLIO-4221](https://folio-org.atlassian.net/browse/FOLIO-4221))
 
