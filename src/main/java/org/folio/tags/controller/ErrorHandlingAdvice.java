@@ -31,13 +31,13 @@ public class ErrorHandlingAdvice {
     return createInternalError(e.getMessage(), NOT_FOUND_ERROR);
   }
 
-  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
   @ExceptionHandler(ConstraintViolationException.class)
   public Errors handleConstraintViolationException(ConstraintViolationException e) {
     return createInternalError(e.getMessage(), VALIDATION_ERROR);
   }
 
-  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
   @ExceptionHandler(DataIntegrityViolationException.class)
   public Errors handleDataIntegrityException(DataIntegrityViolationException e) {
     var localizedMessage = e.getMostSpecificCause().getLocalizedMessage();
@@ -45,7 +45,7 @@ public class ErrorHandlingAdvice {
     return createInternalError(message, VALIDATION_ERROR);
   }
 
-  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
   @ExceptionHandler({
     IllegalArgumentException.class,
     MissingServletRequestParameterException.class,

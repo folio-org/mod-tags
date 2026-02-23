@@ -126,7 +126,7 @@ class TagsApiTest extends ApiTest {
     var cqlQuery = "!invalid-cql!";
     mockMvc.perform(get("/tags?query={cql}", cqlQuery)
         .headers(defaultHeaders()))
-      .andExpect(status().isUnprocessableEntity())
+      .andExpect(status().isUnprocessableContent())
       .andExpect(exceptionMatch(CqlQueryValidationException.class))
       .andExpect(errorMessageMatch(containsString("Not implemented yet node type")));
   }
@@ -136,7 +136,7 @@ class TagsApiTest extends ApiTest {
   void return422OnGetCollectionWithInvalidOffset() throws Exception {
     mockMvc.perform(get("/tags?offset={offset}", -1)
         .headers(defaultHeaders()))
-      .andExpect(status().isUnprocessableEntity())
+      .andExpect(status().isUnprocessableContent())
       .andExpect(exceptionMatch(ConstraintViolationException.class))
       .andExpect(errorMessageMatch(containsString("must be greater than or equal to 0")));
   }
@@ -146,7 +146,7 @@ class TagsApiTest extends ApiTest {
   void return422OnGetCollectionWithInvalidLimit() throws Exception {
     mockMvc.perform(get("/tags?limit={limit}", -1)
         .headers(defaultHeaders()))
-      .andExpect(status().isUnprocessableEntity())
+      .andExpect(status().isUnprocessableContent())
       .andExpect(exceptionMatch(ConstraintViolationException.class))
       .andExpect(errorMessageMatch(containsString("must be greater than or equal to 1")));
   }
@@ -177,7 +177,7 @@ class TagsApiTest extends ApiTest {
 
     var duplicateTag = new TagDto().label(label);
     mockMvc.perform(postTag(duplicateTag))
-      .andExpect(status().isUnprocessableEntity())
+      .andExpect(status().isUnprocessableContent())
       .andExpect(exceptionMatch(DataIntegrityViolationException.class))
       .andExpect(errorTypeMatch(ErrorsHelper.ErrorType.INTERNAL.getTypeCode()));
   }
@@ -211,7 +211,7 @@ class TagsApiTest extends ApiTest {
   @DisplayName("Return 422 on get tag by ID when it is invalid")
   void return422OnGetTagByIdWhenIdIsInvalid() throws Exception {
     mockMvc.perform(getTagById("invalid-uuid"))
-      .andExpect(status().isUnprocessableEntity())
+      .andExpect(status().isUnprocessableContent())
       .andExpect(exceptionMatch(ConstraintViolationException.class))
       .andExpect(errorMessageMatch(containsString("must match")));
   }
@@ -252,7 +252,7 @@ class TagsApiTest extends ApiTest {
 
     var duplicateTag = new TagDto().label(label2);
     mockMvc.perform(putTagById(id1, duplicateTag))
-      .andExpect(status().isUnprocessableEntity())
+      .andExpect(status().isUnprocessableContent())
       .andExpect(exceptionMatch(DataIntegrityViolationException.class))
       .andExpect(errorTypeMatch(ErrorsHelper.ErrorType.INTERNAL.getTypeCode()));
   }
