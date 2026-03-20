@@ -24,8 +24,8 @@ public class TagServiceImpl implements TagService {
 
   @Override
   public TagDtoCollection fetchTagCollection(String query, Integer offset, Integer limit) {
-    log.debug("fetchTagCollection:: trying to fetch tag collection by query: {}, offset: {}, limit: {}",
-             query, offset, limit);
+    log.debug("fetchTagCollection:: trying to fetch tag collection, offset: {}, limit: {}",
+             offset, limit);
     Page<Tag> tagPage = repository.findByCql(query, OffsetRequest.of(offset, limit));
     log.info("fetchTagCollection:: loaded tags: {}", tagPage.getNumberOfElements());
     return mapper.toDtoCollection(tagPage);
@@ -33,9 +33,9 @@ public class TagServiceImpl implements TagService {
 
   @Override
   public TagDto createTag(TagDto tag) {
-    log.debug("createTag:: trying to create a tag with: {}", tag);
+    log.debug("createTag:: trying to create a tag");
     Tag saved = repository.save(mapper.toNewEntity(tag));
-    log.info("createTag:: created a tag: {}", saved);
+    log.info("createTag:: created a tag with id: {}", saved.getId());
     return mapper.toDto(saved);
   }
 
