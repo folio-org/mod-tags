@@ -1,6 +1,25 @@
-## 2.5.0 In Progress
+## v3.0.0 2026-04-16
+
+### Breaking changes
+* Upgrade module to Spring Boot v4.0 ([MODTAG-142](https://folio-org.atlassian.net/browse/MODTAG-142))
+
+### Features
+* Ignore incoming tag id during creation ([MODTAG-133](https://folio-org.atlassian.net/browse/MODTAG-133))
+* Removing sensitive info from logs ([MODTAG-129](https://folio-org.atlassian.net/browse/MODTAG-129))
+
+### Tech Dept
 * Use GitHub Workflows for Maven ([MODTAG-143](https://folio-org.atlassian.net/browse/MODTAG-143))
-* Upgrade module to Spring Boot v4.0.2 ([MODTAG-142](https://folio-org.atlassian.net/browse/MODTAG-142))
+* Add config file for dependabot and template for pull request ([MODTAG-137](https://folio-org.atlassian.net/browse/MODTAG-137))
+
+### Dependencies
+* Bump `spring-boot-starter-parent` from `3.4.2` to `4.0.5`
+* Bump `folio-spring-base` from `9.0.0` to `10.0.0`
+* Bump `testcontainers` from `1.20.6` to `1.21.4`
+* Bump `openapi-generator` from `7.12.0` to `7.21.0`
+* Bump `maven-resources-plugin` from `3.3.1` to `3.5.0`
+* Bump `maven-surefire-plugin` from `3.5.2` to `3.5.5`
+* Bump `maven-release-plugin` from `3.1.1` to `3.3.1`
+* Bump `checkstyle` from `8.38` to `13.4.0`
 
 ## v2.4.0 2025-03-13
 * Update to mod-tags Java 21 (Java, spring upgrades) ([FOLIO-4221](https://folio-org.atlassian.net/browse/FOLIO-4221))
