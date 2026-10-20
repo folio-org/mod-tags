@@ -1,3 +1,12 @@
+## v3.0.1 2026-10-20
+
+### Breaking changes
+* Upgrade module to Spring Boot v4.1 ([MODTAG-149](https://folio-org.atlassian.net/browse/MODTAG-149))
+
+### Dependencies
+* Bump `spring-boot-starter-parent` from `4.0.5` to `4.1.1`
+* Bump `folio-spring-base` from `10.0.0` to `10.0.1`
+
 ## v3.0.0 2026-04-16
 
 ### Breaking changes
